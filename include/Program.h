@@ -17,13 +17,15 @@ public:
 	~Program();
 	void setUniformMatrix4fv(const GLchar* uniform, const GLfloat* data);
 
-	void bind() const { glLinkProgram(program_id_); glUseProgram(program_id_); }
+	void bind() const { glUseProgram(program_id_); }
 
 	GLint getAttribLoc(const GLchar* attrib) { return glGetAttribLocation(program_id_, attrib); }
-	GLint getUniformLoc(const GLchar* uniform) { return glGetUniformLocation(program_id_, uniform); }
+	GLint getUniformLoc(const GLchar* uniform) { 
+		GLuint x = glGetUniformLocation(program_id_, uniform); 
+		return x; }
 	GLuint id() { return program_id_; }
 private:
 	GLuint program_id_;
 
-	std::vector<Shader> shaders_;
+	//std::vector<Shader> shaders_;
 };

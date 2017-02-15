@@ -28,6 +28,19 @@ void Camera::setCamera() {
 
 void Camera::renderEdgesFrom(const RenderableObject& object) {
 	Program* program = object.program();
+	program->bind();
 	program->setUniformMatrix4fv("camera", glm::value_ptr(matrix()));
 	object.renderEdges(GL_DYNAMIC_DRAW);
+}
+void Camera::renderPointsFrom(const RenderableObject& object) {
+	Program* program = object.program();
+	program->bind();
+	program->setUniformMatrix4fv("camera", glm::value_ptr(matrix()));
+	object.renderPoints(GL_DYNAMIC_DRAW);
+}
+void Camera::renderFacesFrom(const RenderableObject& object) {
+	Program* program = object.program();
+	program->bind();
+	program->setUniformMatrix4fv("camera", glm::value_ptr(matrix()));
+	object.renderFaces(GL_DYNAMIC_DRAW);
 }

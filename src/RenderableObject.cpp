@@ -4,20 +4,22 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Shader.h"
 
+
 RenderableObject::RenderableObject() {
+	Shader vertex("shaders/Vertex/simple3d.glsl", GL_VERTEX_SHADER);
+	Shader fragment("shaders/Fragment/simpleFragment.glsl", GL_FRAGMENT_SHADER);
+	std::vector<Shader> s = { vertex, fragment };
+	program_ = new Program(s);
+
 	glGenVertexArrays(1, &vao_);
 	glGenBuffers(1, &vbo_);
 	glGenBuffers(1, &ebo_);
 	glBindVertexArray(vao_);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-	Shader vertex("shaders/Vertex/simple3d.glsl", GL_VERTEX_SHADER);
-	Shader fragment("shaders/Fragment/simpleFragment.glsl", GL_FRAGMENT_SHADER);
-	std::vector<Shader> s = { vertex, fragment };
-	program_ = new Program(s);
 
 	GLint posAttrib = program_->getAttribLoc("position");
-	GLint colAttrib = program_->getAttribLoc("color");
+	GLint colAttrib = program_->getAttribLoc("color");;
 
 	glEnableVertexAttribArray(posAttrib);
 	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
@@ -57,13 +59,10 @@ void RenderableObject::init() {
 }
 
 void RenderableObject::prepareRender() const {
-	program_->bind();
-	program_->setUniformMatrix4fv("model", glm::value_ptr(scale_ * rotation_ * translation_));
-
+	program_->setUniformMatrix4fv("model", glm::value_ptr(translation_ *  rotation_ * scale_ ));
 	glBindVertexArray(vao_);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-	glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), vertices_.data(), GL_DYNAMIC_DRAW);
 }
 
 //TODO: add error checking on sizes when rendering.
@@ -71,7 +70,8 @@ void RenderableObject::prepareRender() const {
 // Render model using GL_TRIANGLES
 void RenderableObject::renderFaces(GLenum usage) const {
 	prepareRender();
-
+	
+	glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), vertices_.data(), GL_DYNAMIC_DRAW);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices_.size() * sizeof(Face), indices_.data(), GL_DYNAMIC_DRAW);
 
 	glDrawElements(GL_TRIANGLES, indices_.size() * 3, GL_UNSIGNED_INT, (void*)0);
@@ -79,21 +79,25 @@ void RenderableObject::renderFaces(GLenum usage) const {
 //----------------------------------------------------------------------------
 // Render model using GL_LINES
 void RenderableObject::renderEdges(GLenum usage) const {
-	prepareRender();
-
+	prepareRender(); 
+	
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, edges_.size() * sizeof(Edge), edges_.data(), usage);
+	glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), vertices_.data(), GL_DYNAMIC_DRAW);
+
 	glDrawElements(GL_LINES, edges_.size() * 2, GL_UNSIGNED_INT, (void*)0);
 }
 //----------------------------------------------------------------------------
 // Render model using GL_POINTS
 void RenderableObject::renderPoints(GLenum usage) const {
 	prepareRender();
-
+	
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, edges_.size() * sizeof(Edge), edges_.data(), usage);
+	glBufferData(GL_ARRAY_BUFFER, vertices_.size() * sizeof(Vertex), vertices_.data(), GL_DYNAMIC_DRAW);
 	glDrawArrays(GL_POINTS, 0, vertices_.size());
 }
 // TODO optimize?
 //----------------------------------------------------------------------------
 // Displace all vertices equally
 void RenderableObject::translate(const glm::vec3& displacement) {
-	glm::translate(translation_, displacement );
+	translation_ = glm::translate(translation_, displacement );
 }

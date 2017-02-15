@@ -18,12 +18,12 @@ void Sphere::init() {
 	
 
 	glm::vec4 white = { 1.f, 1.f, 1.f, 1 };
-	glm::vec3 a = center_ + glm::vec3(radius_, 0.f, 0.f);
-	glm::vec3 b = center_ + glm::vec3(-radius_, 0.f, 0.f);
-	glm::vec3 c = center_ + glm::vec3(0.f, radius_, 0.f);
-	glm::vec3 d = center_ + glm::vec3(0.f, -radius_, 0.f);
-	glm::vec3 e = center_ + glm::vec3(0.f, 0.f, radius_);
-	glm::vec3 f = center_ + glm::vec3(0.f, 0.f, -radius_);
+	glm::vec3 a = glm::vec3(radius_, 0.f, 0.f);
+	glm::vec3 b = glm::vec3(-radius_, 0.f, 0.f);
+	glm::vec3 c = glm::vec3(0.f, radius_, 0.f);
+	glm::vec3 d = glm::vec3(0.f, -radius_, 0.f);
+	glm::vec3 e = glm::vec3(0.f, 0.f, radius_);
+	glm::vec3 f = glm::vec3(0.f, 0.f, -radius_);
 	vertices_ = { { a, white }, { b, white }, { c, white },
 	{ d, white }, { e, white }, { f, white } };
 
@@ -54,7 +54,7 @@ void Sphere::init() {
 		edges_.push_back({ at.a, at.c });
 		edges_.push_back({ at.b, at.c });
 	}
-	
+	translate(center_);
 }
 
 void Sphere::subdivideTriangle(int face_idx) {
@@ -83,8 +83,8 @@ void Sphere::subdivideTriangle(int face_idx) {
 
 Vertex Sphere::midPoint(const int p1, const int p2) {
 	Vertex v = (vertices_.at(p1) + vertices_.at(p2));
-	glm::vec3 x = v.position - center_;
-	return{ glm::normalize(x) * radius_ + center_, v.color };
+	glm::vec3 x = v.position;
+	return{ glm::normalize(x) * radius_, v.color };
 }
 
 bool Sphere::intersectsGround(const glm::vec3& groundPlane) {

@@ -1,30 +1,47 @@
-#include <stdio.h>
-#include <stdlib.h>
-#define _GLFW_WIN32
-
 #include <GL/glew.h>
 
-#include <chrono>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <chrono>
 #include <iostream>
 
 #include "Camera.h"
-#include "Projectile.h"
-#include "PendulumSpring.h"
-#include "RenderableObject.h"
 #include "Sphere.h"
+#include "RenderableObject.h"
 
+#define PI 3.14159
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 800
-#define PI 3.14159265359
 
-static GLdouble mouse_x_g, mouse_y_g;
-static bool mouse_drag_g = false;
 
+GLdouble mouse_x_g, mouse_y_g;
+bool mouse_drag_g = false;
 Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
+glm::mat4 view;
+Vertex axes[] = {
+	{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1 } },
+	{ { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1 } },  // Z axis - Blue
+	{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1 } },
+	{ { 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1 } },  // Y axis - Green
+	{ { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1 } },
+	{ { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1 } }  // X axis - Red
+};
+
+void resetCamera() {
+	glm::vec3 camera_pos = {
+		cos(camera.rotV() * PI / 180) * sin(camera.rotU() * PI / 180) * camera.dolly(),
+		sin(camera.rotV() * PI / 180) * sin(camera.rotU() * PI / 180) * camera.dolly(),
+		camera.dolly() * cos(camera.rotU() * PI / 180)
+	};
+	view = glm::lookAt(
+		camera_pos,
+		glm::vec3(0.f, 0.f, 0.f),
+		glm::vec3(0.f, 0.f, 1.f)
+		);
+}
 
 //----------------------------------------------------------------------------
 // function that is called whenever a key is pressed
@@ -87,9 +104,10 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 		mouse_drag_g = false;
 	}
 }
+
 //----------------------------------------------------------------------------
 // GLFW window stuff
-static void createWindow(GLFWwindow** window, int height, int width) {
+void createWindow(GLFWwindow** window, int height, int width) {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
@@ -97,33 +115,34 @@ static void createWindow(GLFWwindow** window, int height, int width) {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	*window = glfwCreateWindow(width, height, "Cloth Simulation", nullptr, nullptr);  // Windowed
+	*window = glfwCreateWindow(height, width, "test", nullptr, nullptr);  // Windowed
 	glfwMakeContextCurrent(*window);
 }
 
 
-
-int main(void) {
+int main() {
 	auto t_start = std::chrono::high_resolution_clock::now();
 	/**********************************
 	* Initialize library elements
 	***********************************/
 	GLFWwindow *window;
 
-	glewExperimental = GL_TRUE;
 	createWindow(&window, WINDOW_HEIGHT, WINDOW_WIDTH);
 	if (!window) {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
 	}
+	glewExperimental = GL_TRUE;
+
 	if (glewInit() != GLEW_OK) {
 		exit(EXIT_FAILURE);
 	}
-	if (!glfwInit()) {
-		exit(EXIT_FAILURE);
-	}
 	glfwSwapInterval(1);
-	glfwMakeContextCurrent(window);
+	/**********************************
+	* Enable openGL processing features
+	***********************************/
+	glEnable(GL_BLEND); glEnable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	/**********************************
 	* Define GLFW input callbacks
 	***********************************/
@@ -131,31 +150,20 @@ int main(void) {
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetCursorPosCallback(window, cursor_pos_callback);
 	/**********************************
-	* Enable openGL processing features
-	***********************************/
-	glEnable(GL_BLEND); glEnable(GL_DEPTH_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	/**********************************
-	* Setup camera transformations
-	***********************************/
-	camera.setCamera();
-	/**********************************
-	* Create objects and populate
+	* Define buffer objects
 	***********************************/
 	RenderableObject axes;
 	axes.init();
+	Sphere sphere(.25, { 0, 0, 1 }, 3);
+	sphere.init();
 
-	//Sphere sphere(.3, { 1.f, 1.f, 2.f }, 3);
-	//sphere.init();
-	//PendulumSpring test;
-	//test.init(&sphere);
-	/**********************************
-	* Dat main loop tho
-	***********************************/
 	int frames = 0;
 	double total_time = 0;
 	auto t_now = t_start, t_last = t_start;
+	camera.setCamera();
+
 	while (!glfwWindowShouldClose(window)) {
+		glfwPollEvents();
 		/**********************************
 		* Elapsed time previous loop
 		***********************************/
@@ -173,22 +181,22 @@ int main(void) {
 		/**********************************
 		* Draw our objects
 		***********************************/
-		camera.setCamera();
 		camera.renderEdgesFrom(axes);
-		//camera.renderEdgesFrom(sphere);
+		camera.renderPointsFrom(sphere);
 		glfwSwapBuffers(window);
 		/**********************************
-		* Update any elements at the end of the loop
+		* Limit framerate
 		***********************************/
-		//dyna.update(time > .033 ? .033 : time);
-		//test.update(time > .02 ? .02 : time);
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}
-	/**********************************
-	* Cleanup
-	***********************************/
-	glfwDestroyWindow(window);
-	glfwTerminate();
 
+	//glDeleteProgram(shader_program);
+	//glDeleteShader(fragment_shader);
+	//glDeleteShader(vertex_shader);
+
+	glfwDestroyWindow(window);
+
+	glfwTerminate();
 	exit(EXIT_SUCCESS);
+
 }

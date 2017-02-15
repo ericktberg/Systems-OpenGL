@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 
-std::string readFile(const char* file_path) {
+std::string readmyFile(const char* file_path) {
 	std::string shader_content;
 	std::ifstream file_stream(file_path, std::ios::in);
 
@@ -28,12 +28,14 @@ std::string readFile(const char* file_path) {
 }
 
 Shader::Shader(std::string source, GLenum type) {
-	std::string vertexSource = readFile(source.c_str());
-	const GLchar *cstr = vertexSource.c_str();
+	shader_text_ = readmyFile(source.c_str());
+	const GLchar *cstr = shader_text_.c_str();
 	fprintf(stderr, "%s", cstr);
+
 	shader_id_ = glCreateShader(type);
 	glShaderSource(shader_id_, 1, &cstr, NULL);
 	glCompileShader(shader_id_);
+
 	GLint status;
 	glGetShaderiv(shader_id_, GL_COMPILE_STATUS, &status);
 	if (status != GL_TRUE) {

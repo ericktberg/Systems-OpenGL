@@ -11,4 +11,5 @@ public:
 
 private:
 	GLuint shader_id_;
+	std::string shader_text_;
 };
