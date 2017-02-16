@@ -7,7 +7,7 @@
 class Projectile : public DynamicObject {
 public: 
 	Projectile(glm::vec3 init_velocity, glm::vec3 gravity);
-	Projectile(glm::vec3 gravity);
+	Projectile(glm::vec3 init_velocity);
 	~Projectile();
 	void init(RenderableObject* object);
 	void update(float dt);

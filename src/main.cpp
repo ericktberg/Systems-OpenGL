@@ -9,8 +9,15 @@
 #include <iostream>
 
 #include "Camera.h"
+
+#include "Plane.h"
 #include "Sphere.h"
+#include "Spline.h"
 #include "RenderableObject.h"
+
+#include "Cloth.h"
+#include "PendulumSpring.h"
+#include "Projectile.h"
 
 #define PI 3.14159
 #define WINDOW_WIDTH 800
@@ -20,28 +27,6 @@
 GLdouble mouse_x_g, mouse_y_g;
 bool mouse_drag_g = false;
 Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
-glm::mat4 view;
-Vertex axes[] = {
-	{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f, 1 } },
-	{ { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f, 1 } },  // Z axis - Blue
-	{ { 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1 } },
-	{ { 0.0f, 1.0f, 0.0f }, { 0.0f, 1.0f, 0.0f, 1 } },  // Y axis - Green
-	{ { 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1 } },
-	{ { 1.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f, 1 } }  // X axis - Red
-};
-
-void resetCamera() {
-	glm::vec3 camera_pos = {
-		cos(camera.rotV() * PI / 180) * sin(camera.rotU() * PI / 180) * camera.dolly(),
-		sin(camera.rotV() * PI / 180) * sin(camera.rotU() * PI / 180) * camera.dolly(),
-		camera.dolly() * cos(camera.rotU() * PI / 180)
-	};
-	view = glm::lookAt(
-		camera_pos,
-		glm::vec3(0.f, 0.f, 0.f),
-		glm::vec3(0.f, 0.f, 1.f)
-		);
-}
 
 //----------------------------------------------------------------------------
 // function that is called whenever a key is pressed
@@ -154,8 +139,19 @@ int main() {
 	***********************************/
 	RenderableObject axes;
 	axes.init();
-	Sphere sphere(.25, { 0, 0, 1 }, 3);
+
+	Sphere sphere(.5, { 0, 0, 2 }, 3);
 	sphere.init();
+
+	Plane plane(2, 2, { .4, .1, .4, 1 }, 20, 20);
+	plane.init();
+	plane.translate({ 0, 0, 3 });
+
+	Plane ground(20, 20, { .6, .2, .2, 1 }, 20, 20);
+	ground.init();
+
+	Cloth cloth;
+	cloth.init(&plane);
 
 	int frames = 0;
 	double total_time = 0;
@@ -182,17 +178,17 @@ int main() {
 		* Draw our objects
 		***********************************/
 		camera.renderEdgesFrom(axes);
-		camera.renderPointsFrom(sphere);
+		camera.renderEdgesFrom(sphere);
+		camera.renderEdgesFrom(ground);
+		camera.renderSystem(cloth);
+
 		glfwSwapBuffers(window);
 		/**********************************
 		* Limit framerate
 		***********************************/
+		cloth.update(time > .001 ? .001 : time, sphere);
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}
-
-	//glDeleteProgram(shader_program);
-	//glDeleteShader(fragment_shader);
-	//glDeleteShader(vertex_shader);
 
 	glfwDestroyWindow(window);
 

@@ -16,29 +16,37 @@ find_package(OpenGL)
 set(SOURCES
 	src/callbacks.cpp
 	src/Camera.cpp
+	src/Cloth.cpp
 	src/DynamicObject.cpp
 	src/glew.c
 	src/main.cpp
 	src/PendulumSpring.cpp
+	src/Plane.cpp
 	src/Program.cpp
 	src/Projectile.cpp
 	src/RenderableObject.cpp
 	src/Shader.cpp
 	src/Sphere.cpp
+	src/Spline.cpp
+	src/Subdivider.cpp
 	src/UtilGLEW.cpp
 	)
 set(HEADERS
 	include/Camera.h
+	include/Cloth.h
 	include/DynamicObject.h
 	include/Edge.h
 	include/Face.h
 	include/GL/glew.h
 	include/PendulumSpring.h
+	include/Plane.h
 	include/Program.h
 	include/Projectile.h
 	include/RenderableObject.h
 	include/Shader.h
 	include/Sphere.h
+	include/Spline.h
+	include/Subdivider.h
 	include/Vertex.h
 	include/util/UtilGLEW.h
 	)

@@ -20,12 +20,10 @@ public:
 	void bind() const { glUseProgram(program_id_); }
 
 	GLint getAttribLoc(const GLchar* attrib) { return glGetAttribLocation(program_id_, attrib); }
-	GLint getUniformLoc(const GLchar* uniform) { 
-		GLuint x = glGetUniformLocation(program_id_, uniform); 
-		return x; }
+	GLint getUniformLoc(const GLchar* uniform) { return glGetUniformLocation(program_id_, uniform);}
 	GLuint id() { return program_id_; }
 private:
 	GLuint program_id_;
 
-	//std::vector<Shader> shaders_;
+	std::vector<Shader> shaders_;
 };

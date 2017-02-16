@@ -1,6 +1,6 @@
 #include "Sphere.h"
-
-
+#include <glm/gtx/norm.hpp>
+#include <algorithm>
 Sphere::Sphere(float radius, glm::vec3 center, int subdiv) :
 		radius_(radius), 
 		center_(center),
@@ -17,7 +17,7 @@ Sphere::~Sphere()
 void Sphere::init() {
 	
 
-	glm::vec4 white = { 1.f, 1.f, 1.f, 1 };
+	glm::vec4 white = { .8f, .8f, .8f, 1 };
 	glm::vec3 a = glm::vec3(radius_, 0.f, 0.f);
 	glm::vec3 b = glm::vec3(-radius_, 0.f, 0.f);
 	glm::vec3 c = glm::vec3(0.f, radius_, 0.f);
@@ -88,10 +88,31 @@ Vertex Sphere::midPoint(const int p1, const int p2) {
 }
 
 bool Sphere::intersectsGround(const glm::vec3& groundPlane) {
+	glm::mat4 transp = translation_ * rotation_ * scale_;
 	for (int i = 0; i < vertices_.size(); i++) {
-		if (vertices_.at(i).position.z < groundPlane.z) {
+		if ((transp * glm::vec4(vertices_.at(i).position, 1)).z < groundPlane.z) {
 			return true;
 		}
 	}
 	return false;
 }
+
+
+
+float Sphere::collisionPoint(const glm::vec3& vector, const glm::vec3& position) const {
+	float A = glm::dot(vector, vector);
+	float B = 2 * glm::dot(vector, (position - center_));
+	float C = glm::dot(position - center_, position - center_) - radius_ * radius_;
+
+	float discriminant = B * B - 4 * A * C;
+	float t;
+	if (discriminant >= 0) {
+		t = std::min((-B + sqrt(discriminant)) / (2 * A), (-B - sqrt(discriminant)) / ( 2 * A));
+	}
+	else {
+		t = -1;
+	}
+
+	return t;
+}
+

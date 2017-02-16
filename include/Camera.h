@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 
+#include "DynamicObject.h"
 #include "RenderableObject.h"
 
 #define PI 3.14159
@@ -23,9 +24,10 @@ public:
 	void renderEdgesFrom(const RenderableObject& object);
 	void renderFacesFrom(const RenderableObject& object);
 	void renderPointsFrom(const RenderableObject& object);
+	void renderSystem(const DynamicObject& object);
 	void setCamera();
 
-
+private:
 
 	float rot_v_, rot_u_, dolly_;
 

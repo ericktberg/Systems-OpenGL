@@ -44,3 +44,7 @@ void Camera::renderFacesFrom(const RenderableObject& object) {
 	program->setUniformMatrix4fv("camera", glm::value_ptr(matrix()));
 	object.renderFaces(GL_DYNAMIC_DRAW);
 }
+
+void Camera::renderSystem(const DynamicObject& object) {
+	object.render();
+}

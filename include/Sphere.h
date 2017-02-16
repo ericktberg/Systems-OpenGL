@@ -8,8 +8,9 @@ public:
 	Sphere(float radius, glm::vec3 center, int subdiv);
 	~Sphere();
 	void init();
-	bool intersectsGround(const glm::vec3& groundPlane);
-
+	bool intersectsGround(const glm::vec3& ground_plane);
+	float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const;
+	glm::vec3 center() const { return center_; }
 
 private:
 	void subdivideTriangle(int face_idx);

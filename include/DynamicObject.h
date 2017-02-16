@@ -9,6 +9,7 @@ public:
 	DynamicObject(glm::vec3 gravity = { 0, 0, -9.8 });
 	~DynamicObject();
 	virtual void update(float dt) = 0;
+	virtual void render() const = 0;
 protected:
 	glm::vec3 gravity_;
 };

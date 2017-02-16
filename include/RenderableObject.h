@@ -18,6 +18,16 @@ public:
 	virtual void init();
 	virtual bool intersectsGround(const glm::vec3& groundPlane) { return false; }
 	virtual void translate(const glm::vec3& displacement);
+	virtual void translate(glm::mat4 translation) { translation_ = translation; }
+
+	int size() const { return vertices_.size(); }
+
+	void movePoint(int idx, glm::vec3 displacement) { vertices_.at(idx).position += displacement; }
+	glm::vec3 point(int idx) const { return vertices_.at(idx).position; }
+	glm::vec3 position() const { return position_; }
+
+	glm::mat4 translation() const { return translation_; }
+
 
 	Program* program() const { return program_; }
 
@@ -25,6 +35,8 @@ protected:
 	Program* program_;
 
 	GLuint vbo_, vao_, ebo_;
+
+	glm::vec3 position_;
 	glm::mat4 translation_;
 	glm::mat4 rotation_;
 	glm::mat4 scale_;

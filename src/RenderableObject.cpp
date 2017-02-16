@@ -19,7 +19,7 @@ RenderableObject::RenderableObject() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
 
 	GLint posAttrib = program_->getAttribLoc("position");
-	GLint colAttrib = program_->getAttribLoc("color");;
+	GLint colAttrib = program_->getAttribLoc("color");
 
 	glEnableVertexAttribArray(posAttrib);
 	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
@@ -99,5 +99,6 @@ void RenderableObject::renderPoints(GLenum usage) const {
 //----------------------------------------------------------------------------
 // Displace all vertices equally
 void RenderableObject::translate(const glm::vec3& displacement) {
+	position_ += displacement;
 	translation_ = glm::translate(translation_, displacement );
 }
