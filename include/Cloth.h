@@ -16,15 +16,17 @@ public:
 	void update(float dt);
 	void update(float dt, const Sphere& sphere);
 private:
-	struct Particle {
+	struct Node {
 		glm::vec3 position;
 		glm::vec3 velocity;
 		glm::vec3 acceleration;
-		int neighbors[4];
+		int stretch[4];
+		int shear[4];
+		int bend[8];
 	};
 
 	Plane* plane_;
-	std::vector<Particle*> nodes_;
+	std::vector<Node*> nodes_;
 
-	float ks_, kd_, rest_length_;
+	float kstretch_, kdamp_, kshear_, kbend_, rest_stretch_, rest_shear_, rest_bend_;
 };

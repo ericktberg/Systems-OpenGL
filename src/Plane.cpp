@@ -63,26 +63,108 @@ void Plane::init() {
 
 std::vector<int> Plane::neighbors(int idx) const {
 	std::vector<int> v;
-	v.reserve(4);
-	if (((idx + 1) % h_segments_)) {
+	v.reserve(16);
+	
+	//	x	x	x	x	x
+	//	x	ul	u	ur	x
+	//	x	l	idx	r	x
+	//	x	bl	b	br	x
+	//	x	x	x	x	x
+	
+	bool u = idx % h_segments_ != 0;
+	bool l = idx - h_segments_ >= 0;
+	bool b = ((idx + 1) % h_segments_) != 0;
+	bool r = idx + h_segments_ < h_segments_*w_segments_;
+
+	if (b) {
 		v.push_back(idx + 1);
 	}
 	else {
 		v.push_back(-1);
 	}
 
-	if ((idx % h_segments_)) {
+	if (u) { // previous height
 		v.push_back(idx - 1);
 	}
 	else { v.push_back(-1); }
 
-	if (idx + h_segments_ < h_segments_*w_segments_) {
+	if (r) { // next width
 		v.push_back(idx + h_segments_);
 	}
 	else { v.push_back(-1); }
 
-	if (idx - h_segments_ >= 0) {
+	if (l) { // previous width
 		v.push_back(idx - h_segments_);
+	}
+	else { v.push_back(-1); }
+
+	if (u && l) {
+		v.push_back(idx - h_segments_ - 1);
+	}
+	else { v.push_back(-1); }
+
+	if (b && l) {
+		v.push_back(idx - h_segments_ + 1);
+	}
+	else { v.push_back(-1); }
+
+	if (u && r) {
+		v.push_back(idx + h_segments_ - 1);
+	}
+	else { v.push_back(-1); }
+
+	if (b && r) { // previous width
+		v.push_back(idx + h_segments_ + 1);
+	}
+	else { v.push_back(-1); }
+
+	// bend springs
+	u = idx - 1 % h_segments_ != 0;
+	l = idx - h_segments_ * 2 >= 0;
+	b = ((idx + 2) % h_segments_) != 0 && idx + 2 < h_segments_*w_segments_;
+	r = idx + h_segments_ * 2 < h_segments_*w_segments_;
+
+	bool ul = idx - 1 >= 0;
+	bool br = idx + h_segments_ * 2 < h_segments_*w_segments_ - 1;
+	if (b) {
+		v.push_back(idx + 2);
+	}
+	else {
+		v.push_back(-1);
+	}
+
+	if (u) { // previous height
+		v.push_back(idx - 2);
+	}
+	else { v.push_back(-1); }
+
+	if (r) { // next width
+		v.push_back(idx + h_segments_ * 2);
+	}
+	else { v.push_back(-1); }
+
+	if (l) { // previous width
+		v.push_back(idx - h_segments_ * 2);
+	}
+	else { v.push_back(-1); }
+
+	if (u && l && ul) {
+		v.push_back(idx - (h_segments_ - 1) * 2);
+	}
+	else { v.push_back(-1); }
+
+	if (b && l) {
+		v.push_back(idx - (h_segments_ + 1) * 2);
+	}
+	else { v.push_back(-1); }
+
+	if (u && r) {
+		v.push_back(idx + (h_segments_ - 1) * 2);
+	}
+	else { v.push_back(-1); }
+
+	if (b && r && br) {
+		v.push_back(idx + (h_segments_ + 1) * 2);
 	}
 	else { v.push_back(-1); }
 

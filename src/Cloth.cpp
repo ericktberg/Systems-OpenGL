@@ -10,57 +10,98 @@ void Cloth::init(Plane* plane) {
 	nodes_.reserve(plane_->size());
 	
 	for (int i = 0; i < plane_->size(); i++){
-		Particle* node = new Particle;
+		Node* node = new Node;
 		std::vector<int> n = plane_->neighbors(i);
 		node->position = plane_->point(i) + plane_->position();
 		node->velocity = { 0, 0, 0 };
 		node->acceleration = { 0, 0, -2 };
-		for (int j = 0; j < 4; j++) {
-			node->neighbors[j] = n[j];
+		int j = 0;
+		while(j < 4) {
+			node->stretch[j] = n[j];
+			j++;
+		}
+		while (j < 8) {
+			node->shear[j - 4] = n[j];
+			j++;
+		}
+		while (j < 16) {
+			node->bend[j - 8] = n[j];
+			j++;
 		}
 
 		nodes_.push_back(node);
 	}
 
-	ks_ = 1000;
-	kd_ = 10;
-	rest_length_ = .1;
+	kstretch_ = 1000;
+	kshear_ = 800;
+	kbend_ = 50;
+	kdamp_ = 100;
+	rest_stretch_ = .1;
+	rest_shear_ = .14141414;
+	rest_bend_ = .22;
 }	
 
 void Cloth::update(float dt) {
 
 }
 
+// TODO general and more realistic collisions.
+// TODO spatial structure for collisions?
+// TODO better integration
+
+// Update the cloth
+//----------------------------------------------------------------------------
+// Uses the topology setup outlined in http://www.cs.ubc.ca/~ascher/papers/ba.pdf
+// Stiff stretch springs on edge lengths
+// Less stiff shear springs on diagonals
+// Weak, non-linear bend springs on outer ring
 
 void Cloth::update(float dt, const Sphere& sphere) {
 
 	for (int i = 0; i < nodes_.size(); i++) {
-		Particle* node = nodes_.at(i);
+		Node* node = nodes_.at(i);
 
-		glm::vec3 spring_force;
-		glm::vec3 damp_force;
-		for (int i = 0; i < 4; i++) {
-			if (node->neighbors[i] >= 0) {
-				glm::vec3 spring = nodes_.at(node->neighbors[i])->position - node->position;
-				glm::vec3 damp = nodes_.at(node->neighbors[i])->velocity - node->velocity;
-
-				spring_force += ks_*(glm::length(spring) - rest_length_) * glm::normalize(spring);
-				damp_force += kd_ * (damp);
+		glm::vec3 stretch_force, shear_force, damp_force, bend_force;
+		for (int j = 0; j < 4; j++) {
+			if (node->stretch[j] >= 0) {
+				glm::vec3 spring_stretch = nodes_.at(node->stretch[j])->position - node->position;
+				glm::vec3 damp_stretch = nodes_.at(node->stretch[j])->velocity - node->velocity;
+				float length = glm::length(spring_stretch);
+				if (length - rest_stretch_) {
+					stretch_force += kstretch_*(length - rest_stretch_) * spring_stretch / length;
+				}
+				
+				damp_force += kdamp_ * (damp_stretch);
+			}
+			if (node->shear[j] >= 0) {
+				glm::vec3 shear_stretch = nodes_.at(node->shear[j])->position - node->position;
+				float length = glm::length(shear_stretch);
+				if (length - rest_shear_ > 0){
+					shear_force += kshear_ * (length - rest_shear_) * shear_stretch / length;
+				}
 			}
 		}
-
-		node->velocity += (damp_force + spring_force + gravity_) * dt;
-	}
-	for (int i = 0; i < nodes_.size(); i++) {
-		Particle* node = nodes_.at(i);
+		for (int j = 0; j < 8; j++) {
+			if (node->bend[j] >= 0) {
+				glm::vec3 bend_stretch = nodes_.at(node->bend[j])->position - node->position;
+				float length = glm::length(bend_stretch);
+				bend_force += kbend_ * (length - rest_bend_) * (length - rest_bend_) * bend_stretch / length;
+			}
+		}
+		node->velocity += (damp_force + stretch_force + shear_force + gravity_) * dt;
 
 		float t = sphere.collisionPoint(node->velocity, node->position);
 		glm::vec3 point = node->velocity * t + node->position;
 		glm::vec3 n = glm::normalize(point - sphere.center());
 
-		if (abs(t) < dt) {
-			node->velocity += n * glm::dot(node->velocity, n);
+		if (t >= 0 && t < dt) {
+			node->velocity = -n * glm::dot(node->velocity, n);
 		}
+	}
+	for (int i = 0; i < nodes_.size(); i++) {
+		Node* node = nodes_.at(i);
+
+
 		node->position += node->velocity*dt;
 		plane_->movePoint(i, node->velocity*dt);
 	}

@@ -11,6 +11,7 @@ public:
 	bool intersectsGround(const glm::vec3& ground_plane);
 	float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const;
 	glm::vec3 center() const { return center_; }
+	float radius() const { return radius_; }
 
 private:
 	void subdivideTriangle(int face_idx);
