@@ -153,6 +153,11 @@ int main() {
 	Cloth cloth;
 	cloth.init(&plane);
 
+	Sphere ball(.25, { 0, 3, 2 }, 3);
+	ball.init();
+	PendulumSpring pend;
+	pend.init(&ball);
+
 	int frames = 0;
 	double total_time = 0;
 	auto t_now = t_start, t_last = t_start;
@@ -181,12 +186,14 @@ int main() {
 		camera.renderEdgesFrom(sphere);
 		camera.renderEdgesFrom(ground);
 		camera.renderSystem(cloth);
+		camera.renderSystem(pend);
 
 		glfwSwapBuffers(window);
 		/**********************************
 		* Limit framerate
 		***********************************/
-		cloth.update(time > .001 ? .001 : time, sphere);
+		pend.update(time > .03 ? .03 : time);
+		cloth.update(time > .002 ? .002 : time, sphere);
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}
 

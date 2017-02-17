@@ -19,12 +19,19 @@ PendulumSpring::~PendulumSpring()
 }
 
 void PendulumSpring::update(float dt) {
-	glm::vec3 spring_force = k_*(length_ - rest_length_) * cord_->vector();
-	velocity_ += (spring_force / mass_ + gravity_) * dt;
+	// Calc midpoint
+	float length1 = glm::length(p2 - p1);
+	glm::vec3 spring_force1 = k_ * (length1 - rest_length_) * (p2 - p1);
+	glm::vec3 velocity1 = velocity_ + (spring_force1 + gravity_) * dt / 2.f;
+	glm::vec3 midpoint = p1 + velocity1 * dt / 2.f;
+
+	// Use to calculate translation
+	float length2 = glm::length(p2 - midpoint);
+	glm::vec3 spring_force2 = k_ * (length2 - rest_length_) * (p2 - midpoint);
+	velocity_ += (spring_force2 + gravity_) * dt;
 	p1 += velocity_ * dt;
 	object_->translate(velocity_ * dt);
 	cord_->movePoint(0, velocity_ * dt);
-	length_ = glm::length(cord_->vector());
 }
 
 void PendulumSpring::init(RenderableObject* object) {
@@ -36,7 +43,6 @@ void PendulumSpring::init(RenderableObject* object) {
 	cord_->translate(object_->translation());
 	velocity_ = { 0, 0, 0 };
 	rest_length_ = 3;
-	length_ = 3;
 	mass_ = 1;
 	k_ = 100;
 }
