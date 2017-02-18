@@ -1,9 +1,14 @@
 #include "Plane.h"
 
+float lerp(float a, float b, float f)
+{
+	return (a * (1.0f - f)) + (b * f);
+}
+
 Plane::Plane(float width, float height, glm::vec4 color, int w_segments, int h_segments) 
 	: width_(width), height_(height), color_(color),
-	w_segments_(w_segments), h_segments_(h_segments),
-	RenderableObject() 
+	w_segments_(w_segments + 1), h_segments_(h_segments + 1),
+	RenderableObject(0) 
 { 
 	triangulate_ = false;
 
@@ -29,12 +34,15 @@ Plane::~Plane() {
 void Plane::init() {
 	float w_start = -width_ / 2;
 	float h_start = -height_ / 2;
-	float w_step = width_ / (w_segments_ - 1);
-	float h_step = height_ / (h_segments_ - 1);
+	float w_end = width_ / 2;
+	float h_end = height_ / 2;
 
 	for (int w_idx = 0; w_idx < w_segments_; w_idx++) {
 		for (int h_idx = 0; h_idx < h_segments_; h_idx++) {
-			vertices_.push_back({ { w_start + w_idx * w_step, h_start + h_idx * h_step, 0 }, color_ });
+			float w_step = (float)w_idx / (float) (w_segments_ - 1);
+			float h_step = (float)h_idx / (float)(h_segments_ - 1);
+
+			vertices_.push_back({ { lerp(w_start, w_end, w_step), lerp(h_start, h_end, h_step), 0 }, color_ });
 		}
 	}
 	int idx = 0;
@@ -61,6 +69,7 @@ void Plane::init() {
 	}
 }
 
+// TODO: revisit
 std::vector<int> Plane::neighbors(int idx) const {
 	std::vector<int> v;
 	v.reserve(16);
@@ -71,40 +80,18 @@ std::vector<int> Plane::neighbors(int idx) const {
 	//	x	bl	b	br	x
 	//	x	x	x	x	x
 	
-	bool u = idx % h_segments_ != 0;
+	bool u = idx % h_segments_ > 0;
 	bool l = idx - h_segments_ >= 0;
 	bool b = ((idx + 1) % h_segments_) != 0;
 	bool r = idx + h_segments_ < h_segments_*w_segments_;
-
-	if (b) {
-		v.push_back(idx + 1);
-	}
-	else {
-		v.push_back(-1);
-	}
-
-	if (u) { // previous height
-		v.push_back(idx - 1);
-	}
-	else { v.push_back(-1); }
-
-	if (r) { // next width
-		v.push_back(idx + h_segments_);
-	}
-	else { v.push_back(-1); }
-
-	if (l) { // previous width
-		v.push_back(idx - h_segments_);
-	}
-	else { v.push_back(-1); }
 
 	if (u && l) {
 		v.push_back(idx - h_segments_ - 1);
 	}
 	else { v.push_back(-1); }
 
-	if (b && l) {
-		v.push_back(idx - h_segments_ + 1);
+	if (u) { // previous height
+		v.push_back(idx - 1);
 	}
 	else { v.push_back(-1); }
 
@@ -113,48 +100,48 @@ std::vector<int> Plane::neighbors(int idx) const {
 	}
 	else { v.push_back(-1); }
 
+	if (r) { // next width
+		v.push_back(idx + h_segments_);
+	}
+	else { v.push_back(-1); }
+
 	if (b && r) { // previous width
 		v.push_back(idx + h_segments_ + 1);
 	}
 	else { v.push_back(-1); }
 
-	// bend springs
-	u = idx - 1 % h_segments_ != 0;
-	l = idx - h_segments_ * 2 >= 0;
-	b = ((idx + 2) % h_segments_) != 0 && idx + 2 < h_segments_*w_segments_;
-	r = idx + h_segments_ * 2 < h_segments_*w_segments_;
-
-	bool ul = idx - 1 >= 0;
-	bool br = idx + h_segments_ * 2 < h_segments_*w_segments_ - 1;
 	if (b) {
-		v.push_back(idx + 2);
+		v.push_back(idx + 1);
 	}
 	else {
 		v.push_back(-1);
 	}
 
-	if (u) { // previous height
-		v.push_back(idx - 2);
-	}
-	else { v.push_back(-1); }
-
-	if (r) { // next width
-		v.push_back(idx + h_segments_ * 2);
+	if (b && l) {
+		v.push_back(idx - h_segments_ + 1);
 	}
 	else { v.push_back(-1); }
 
 	if (l) { // previous width
-		v.push_back(idx - h_segments_ * 2);
+		v.push_back(idx - h_segments_);
 	}
 	else { v.push_back(-1); }
 
-	if (u && l && ul) {
+	
+
+	// bend springs
+	u = idx % h_segments_ > 1;
+	l = idx - h_segments_ * 2 >= 0;
+	b = (idx + 2) % h_segments_ > 1;
+	r = idx + h_segments_ * 2 < h_segments_*w_segments_;
+
+	if (u && l) {
 		v.push_back(idx - (h_segments_ - 1) * 2);
 	}
 	else { v.push_back(-1); }
 
-	if (b && l) {
-		v.push_back(idx - (h_segments_ + 1) * 2);
+	if (u) { // previous height
+		v.push_back(idx - 2);
 	}
 	else { v.push_back(-1); }
 
@@ -163,10 +150,33 @@ std::vector<int> Plane::neighbors(int idx) const {
 	}
 	else { v.push_back(-1); }
 
-	if (b && r && br) {
+	if (r) { // next width
+		v.push_back(idx + h_segments_ * 2);
+	}
+	else { v.push_back(-1); }
+
+	if (b && r) {
 		v.push_back(idx + (h_segments_ + 1) * 2);
 	}
 	else { v.push_back(-1); }
+
+	if (b) {
+		v.push_back(idx + 2);
+	}
+	else {
+		v.push_back(-1);
+	}
+	
+	if (b && l) {
+		v.push_back(idx - (h_segments_ + 1) * 2);
+	}
+	else { v.push_back(-1); }	
+
+	if (l) { // previous width
+		v.push_back(idx - h_segments_ * 2);
+	}
+	else { v.push_back(-1); }
+
 
 	return v;
 }

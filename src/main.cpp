@@ -23,6 +23,7 @@
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 800
 
+bool active = false;
 
 GLdouble mouse_x_g, mouse_y_g;
 bool mouse_drag_g = false;
@@ -51,6 +52,12 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			camera.dollyInc(.5);
 		}
 		camera.setCamera();
+		break;
+
+	case GLFW_KEY_SPACE:
+		if (action == GLFW_PRESS){
+			active ^= true;
+		}
 		break;
 	case 033:  // octal ascii code for ESC
 	case 'q':
@@ -137,7 +144,7 @@ int main() {
 	/**********************************
 	* Define buffer objects
 	***********************************/
-	RenderableObject axes;
+	RenderableObject axes(1);
 	axes.init();
 
 	Sphere sphere(.5, { 0, 0, 2 }, 3);
@@ -145,7 +152,7 @@ int main() {
 
 	Plane plane(2, 2, { .4, .1, .4, 1 }, 20, 20);
 	plane.init();
-	plane.translate({ 0, 0, 3 });
+	plane.translate({ -1, 0, 3 });
 
 	Plane ground(20, 20, { .6, .2, .2, 1 }, 20, 20);
 	ground.init();
@@ -155,8 +162,7 @@ int main() {
 
 	Sphere ball(.25, { 0, 3, 2 }, 3);
 	ball.init();
-	PendulumSpring pend;
-	pend.init(&ball);
+
 
 	int frames = 0;
 	double total_time = 0;
@@ -182,18 +188,19 @@ int main() {
 		/**********************************
 		* Draw our objects
 		***********************************/
+
 		camera.renderEdgesFrom(axes);
-		camera.renderEdgesFrom(sphere);
+		camera.renderFacesFrom(sphere);
 		camera.renderEdgesFrom(ground);
 		camera.renderSystem(cloth);
-		camera.renderSystem(pend);
 
 		glfwSwapBuffers(window);
 		/**********************************
 		* Limit framerate
 		***********************************/
-		pend.update(time > .03 ? .03 : time);
-		cloth.update(time > .002 ? .002 : time, sphere);
+		if (active){
+			cloth.update(time > .03 ? .03 : time, sphere);
+		}
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}
 

@@ -5,7 +5,7 @@ Sphere::Sphere(float radius, glm::vec3 center, int subdiv) :
 		radius_(radius), 
 		center_(center),
 		subdiv_(subdiv),
-		RenderableObject()
+		RenderableObject(0)
 {
 }
 
@@ -18,14 +18,14 @@ void Sphere::init() {
 	
 
 	glm::vec4 white = { .8f, .8f, .8f, 1 };
-	glm::vec3 a = glm::vec3(radius_, 0.f, 0.f);
-	glm::vec3 b = glm::vec3(-radius_, 0.f, 0.f);
-	glm::vec3 c = glm::vec3(0.f, radius_, 0.f);
-	glm::vec3 d = glm::vec3(0.f, -radius_, 0.f);
-	glm::vec3 e = glm::vec3(0.f, 0.f, radius_);
-	glm::vec3 f = glm::vec3(0.f, 0.f, -radius_);
-	vertices_ = { { a, white }, { b, white }, { c, white },
-	{ d, white }, { e, white }, { f, white } };
+	glm::vec3 a = glm::vec3(1.f, 0.f, 0.f);
+	glm::vec3 b = glm::vec3(-1.f, 0.f, 0.f);
+	glm::vec3 c = glm::vec3(0.f, 1.f, 0.f);
+	glm::vec3 d = glm::vec3(0.f, -1.f, 0.f);
+	glm::vec3 e = glm::vec3(0.f, 0.f, 1.f);
+	glm::vec3 f = glm::vec3(0.f, 0.f, -1.f);
+	vertices_ = { { radius_*a, white, a }, { radius_*b, white, b }, { radius_*c, white, c },
+	{ radius_*d, white, d }, { radius_*e, white, e }, { radius_*f, white, f } };
 
 	indices_ = {
 		{ 0, 4, 2 },
@@ -55,6 +55,9 @@ void Sphere::init() {
 		edges_.push_back({ at.b, at.c });
 	}
 	translate(center_);
+
+	// HACK for collisions
+	radius_ = radius_ + .1;
 }
 
 void Sphere::subdivideTriangle(int face_idx) {
@@ -84,7 +87,7 @@ void Sphere::subdivideTriangle(int face_idx) {
 Vertex Sphere::midPoint(const int p1, const int p2) {
 	Vertex v = (vertices_.at(p1) + vertices_.at(p2));
 	glm::vec3 x = v.position;
-	return{ glm::normalize(x) * radius_, v.color };
+	return{ glm::normalize(x) * radius_, v.color, glm::normalize(x) };
 }
 
 bool Sphere::intersectsGround(const glm::vec3& groundPlane) {

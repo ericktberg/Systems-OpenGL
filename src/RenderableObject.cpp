@@ -5,11 +5,20 @@
 #include "Shader.h"
 
 
-RenderableObject::RenderableObject() {
+RenderableObject::RenderableObject(int type) {
+	std::string f;
+	if (type) {
+		 f = "shaders/Fragment/simpleFragment.glsl";
+	}
+	else {
+		f = "shaders/Fragment/diffuse.glsl";
+	}
+	Shader fragment(f, GL_FRAGMENT_SHADER);
+
 	Shader vertex("shaders/Vertex/simple3d.glsl", GL_VERTEX_SHADER);
-	Shader fragment("shaders/Fragment/simpleFragment.glsl", GL_FRAGMENT_SHADER);
+
 	std::vector<Shader> s = { vertex, fragment };
-	program_ = new Program(s);
+	program_ = new Program(type);
 
 	glGenVertexArrays(1, &vao_);
 	glGenBuffers(1, &vbo_);
@@ -20,11 +29,14 @@ RenderableObject::RenderableObject() {
 
 	GLint posAttrib = program_->getAttribLoc("position");
 	GLint colAttrib = program_->getAttribLoc("color");
+	GLint normAttrib = program_->getAttribLoc("normal");
 
 	glEnableVertexAttribArray(posAttrib);
 	glVertexAttribPointer(posAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 	glEnableVertexAttribArray(colAttrib);
 	glVertexAttribPointer(colAttrib, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(normAttrib);
+	glVertexAttribPointer(normAttrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(7 * sizeof(GLfloat)));
 }
 
 RenderableObject::~RenderableObject() {

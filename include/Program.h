@@ -13,14 +13,14 @@
 class Program {
 
 public:
-	Program(std::vector<Shader>);
+	Program(int type);
 	~Program();
 	void setUniformMatrix4fv(const GLchar* uniform, const GLfloat* data);
-
+	void setUniformVector3fv(const GLchar* unfirom, float v0, float v1, float v2);
 	void bind() const { glUseProgram(program_id_); }
 
 	GLint getAttribLoc(const GLchar* attrib) { return glGetAttribLocation(program_id_, attrib); }
-	GLint getUniformLoc(const GLchar* uniform) { return glGetUniformLocation(program_id_, uniform);}
+	GLint getUniformLoc(const GLchar* uniform) { return glGetUniformLocation(program_id_, uniform); }
 	GLuint id() { return program_id_; }
 private:
 	GLuint program_id_;

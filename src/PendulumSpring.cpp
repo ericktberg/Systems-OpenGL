@@ -47,7 +47,8 @@ void PendulumSpring::init(RenderableObject* object) {
 	k_ = 100;
 }
 
+// TODO: this is a horrible rendering pipeline. Unify shaders.
 void PendulumSpring::render() const {
-	object_->renderEdges(GL_DYNAMIC_DRAW);
+	object_->renderFaces(GL_DYNAMIC_DRAW);
 	cord_->renderEdges(GL_DYNAMIC_DRAW);
 }

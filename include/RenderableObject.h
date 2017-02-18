@@ -9,7 +9,7 @@
 class RenderableObject
 {
 public:
-	RenderableObject();
+	RenderableObject(int type);
 	virtual ~RenderableObject();
 	void prepareRender() const;
 	virtual void renderFaces(GLenum usage) const;

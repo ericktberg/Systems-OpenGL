@@ -15,6 +15,8 @@ public:
 	std::vector<int> neighbors(int idx) const;
 	void update(float dt, const Sphere& sphere);
 
+	void updateNormal(int idx, glm::vec3 normal) { vertices_.at(idx).normal = normal; }
+
 private:
 	float width_, height_;
 	int w_segments_, h_segments_;

@@ -1,15 +1,18 @@
 #include "Program.h"
 #include <iostream>
 
-Program::Program(std::vector<Shader> shaders) {
+Program::Program(int type) {
 	program_id_ = glCreateProgram();
-	/*for (int i = 0; i < shaders_.size(); i++) {
-		GLuint id = shaders_.at(i).id();
-		glAttachShader(program_id_, id);
-	}*/
+	std::string f;
+	if (type) {
+		f = "shaders/Fragment/simpleFragment.glsl";
+	}
+	else {
+		f = "shaders/Fragment/diffuse.glsl";
+	}
+	Shader fragment(f, GL_FRAGMENT_SHADER);
 
 	Shader vertex("shaders/Vertex/simple3d.glsl", GL_VERTEX_SHADER);
-	Shader fragment("shaders/Fragment/simpleFragment.glsl", GL_FRAGMENT_SHADER);
 
 	glAttachShader(program_id_, vertex.id());
 	glAttachShader(program_id_, fragment.id());
@@ -35,4 +38,8 @@ Program::~Program() {
 
 void Program::setUniformMatrix4fv(const GLchar* uniform, const GLfloat* data) {
 	glUniformMatrix4fv(getUniformLoc(uniform), 1, GL_FALSE, data);
+}
+
+void Program::setUniformVector3fv(const GLchar* uniform, float v0, float v1, float v2) {
+	glUniform3f(getUniformLoc(uniform), v0, v1, v2);
 }
