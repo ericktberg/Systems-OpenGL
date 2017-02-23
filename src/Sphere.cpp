@@ -1,22 +1,15 @@
 #include "Sphere.h"
 #include <glm/gtx/norm.hpp>
 #include <algorithm>
-Sphere::Sphere(float radius, glm::vec3 center, int subdiv) :
+Sphere::Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv) :
 		radius_(radius), 
 		center_(center),
 		subdiv_(subdiv),
-		RenderableObject(0)
+		RenderableObject(mode)
 {
-}
-
-
-Sphere::~Sphere()
-{
-}
-
-void Sphere::init() {
-	
-
+	/**********************************
+	* Create Octohedron
+	***********************************/
 	glm::vec4 white = { .8f, .8f, .8f, 1 };
 	glm::vec3 a = glm::vec3(1.f, 0.f, 0.f);
 	glm::vec3 b = glm::vec3(-1.f, 0.f, 0.f);
@@ -38,7 +31,9 @@ void Sphere::init() {
 		{ 5, 3, 0 }
 	};
 
-
+	/**********************************
+	* Subdivide triangles (create indices in process)
+	***********************************/
 	int i, size;
 	for (int s = 0; s < subdiv_; s++) {
 		size = indices_.size();
@@ -48,18 +43,36 @@ void Sphere::init() {
 		}
 	}
 
+	/**********************************
+	* Find edges
+	***********************************/
 	for (int idx = 0; idx < indices_.size(); idx++) {
 		Face at = indices_.at(idx);
 		edges_.push_back({ at.a, at.b });
 		edges_.push_back({ at.a, at.c });
 		edges_.push_back({ at.b, at.c });
 	}
+
+	/**********************************
+	* Move translation coordinates
+	***********************************/
 	translate(center_);
 
 	// HACK for collisions
 	radius_ = radius_ + .1;
 }
 
+Sphere::Sphere(GLenum mode, float radius, glm::vec3 center) : Sphere(mode, radius, center, 2) {}
+Sphere::Sphere(GLenum mode, float radius) : Sphere(mode, radius, { 0, 0, 0 }) {}
+Sphere::Sphere(GLenum mode) : Sphere(mode, .25) {}
+
+
+Sphere::~Sphere()
+{
+}
+
+//----------------------------------------------------------------------------
+// Turn one triangle into 4
 void Sphere::subdivideTriangle(int face_idx) {
 	Face face = indices_.at(face_idx);
 	int p1 = face.a;
@@ -84,12 +97,16 @@ void Sphere::subdivideTriangle(int face_idx) {
 	indices_.push_back({ p6, p3, p5 });	
 }
 
+//----------------------------------------------------------------------------
+// Calculate the midpoint of a line
 Vertex Sphere::midPoint(const int p1, const int p2) {
 	Vertex v = (vertices_.at(p1) + vertices_.at(p2));
 	glm::vec3 x = v.position;
 	return{ glm::normalize(x) * radius_, v.color, glm::normalize(x) };
 }
 
+//----------------------------------------------------------------------------
+// Will it intersect the ground?
 bool Sphere::intersectsGround(const glm::vec3& groundPlane) {
 	glm::mat4 transp = translation_ * rotation_ * scale_;
 	for (int i = 0; i < vertices_.size(); i++) {
@@ -100,8 +117,9 @@ bool Sphere::intersectsGround(const glm::vec3& groundPlane) {
 	return false;
 }
 
-
-
+//----------------------------------------------------------------------------
+// Return the time parameter "t" of a ray-sphere intersection
+//		Returns -1 on non-intersection
 float Sphere::collisionPoint(const glm::vec3& vector, const glm::vec3& position) const {
 	float A = glm::dot(vector, vector);
 	float B = 2 * glm::dot(vector, (position - center_));

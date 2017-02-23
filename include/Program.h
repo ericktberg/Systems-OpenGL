@@ -10,6 +10,9 @@
 #include <vector>
 #include <string>
 
+#define PHONG_NOSPEC 0
+#define CONSTANT_COL 1
+
 class Program {
 
 public:

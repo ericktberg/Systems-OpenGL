@@ -25,6 +25,7 @@ set(SOURCES
 	src/Program.cpp
 	src/Projectile.cpp
 	src/RenderableObject.cpp
+	src/Scene.cpp
 	src/Shader.cpp
 	src/Sphere.cpp
 	src/Spline.cpp
@@ -43,6 +44,7 @@ set(HEADERS
 	include/Program.h
 	include/Projectile.h
 	include/RenderableObject.h
+	include/Scene.h
 	include/Shader.h
 	include/Sphere.h
 	include/Spline.h

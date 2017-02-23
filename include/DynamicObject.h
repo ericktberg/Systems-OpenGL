@@ -13,10 +13,7 @@ public:
 	DynamicObject(glm::vec3 gravity = { 0, 0, -9.8 });
 	~DynamicObject();
 	virtual void update(float dt) = 0;
-	virtual void render() const = 0;
-
-	virtual Program* program() const = 0;
-
+	virtual void render(Program*) const = 0;
 
 protected:
 	struct Node {
@@ -37,7 +34,6 @@ protected:
 		bool pinned = true;
 
 	};
-
 	std::vector<Node*> nodes_;
 
 	virtual glm::vec3 bounce(
@@ -73,7 +69,7 @@ protected:
 		Node* node2
 		) const;
 
-
-
+	//----------------------------------------------------------------------------
+	// Constants
 	glm::vec3 gravity_;
 };

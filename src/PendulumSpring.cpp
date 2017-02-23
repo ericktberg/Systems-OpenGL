@@ -10,8 +10,22 @@
 #include "PendulumSpring.h"
 #include <iostream>
 
-PendulumSpring::PendulumSpring() : DynamicObject()
+PendulumSpring::PendulumSpring(RenderableObject* object, Spline* spline) : DynamicObject()
 {
+	object_ = object;
+	float x = sqrt(3);
+
+	p1 = { 0, 0, 0 };
+	p2 = glm::vec3(x, x, x);
+	cord_ = spline;
+	cord_->editPoint(0, p1);
+	cord_->editPoint(1, p2);
+
+	cord_->translate(object_->translation());
+	velocity_ = { 0, 0, 0 };
+	rest_length_ = 3;
+	mass_ = 1;
+	k_ = 100;
 }
 
 PendulumSpring::~PendulumSpring()
@@ -31,24 +45,11 @@ void PendulumSpring::update(float dt) {
 	velocity_ += (spring_force2 + gravity_) * dt;
 	p1 += velocity_ * dt;
 	object_->translate(velocity_ * dt);
-	cord_->movePoint(0, velocity_ * dt);
-}
-
-void PendulumSpring::init(RenderableObject* object) {
-	object_ = object;
-	float x = sqrt(3);
-	p1 = { 0, 0, 0 };
-	p2 = glm::vec3(x, x, x);
-	cord_ = new Spline({ 0, 0, 0 }, { x, x, x });
-	cord_->translate(object_->translation());
-	velocity_ = { 0, 0, 0 };
-	rest_length_ = 3;
-	mass_ = 1;
-	k_ = 100;
+	cord_->editPoint(0, p1);
 }
 
 // TODO: this is a horrible rendering pipeline. Unify shaders.
-void PendulumSpring::render() const {
-	object_->renderFaces(GL_DYNAMIC_DRAW);
-	cord_->renderEdges(GL_DYNAMIC_DRAW);
+void PendulumSpring::render(Program* program) const {
+	object_->render(program, GL_DYNAMIC_DRAW);
+	cord_->render(program, GL_DYNAMIC_DRAW);
 }

@@ -5,18 +5,33 @@
 class Sphere : public RenderableObject
 {
 public:
-	Sphere(float radius, glm::vec3 center, int subdiv);
+	//----------------------------------------------------------------------------
+	// Constructors
+	Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv);
+	Sphere(GLenum mode, float radius, glm::vec3 center);
+	Sphere(GLenum mode, float radius);
+	Sphere(GLenum mode);
+
 	~Sphere();
-	void init();
+
+	//----------------------------------------------------------------------------
+	// Collision
 	bool intersectsGround(const glm::vec3& ground_plane);
 	float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const;
+	
+	//----------------------------------------------------------------------------
+	// Parameters
 	glm::vec3 center() const { return center_; }
 	float radius() const { return radius_; }
 
 private:
+	//----------------------------------------------------------------------------
+	// Geometry Construction
 	void subdivideTriangle(int face_idx);
 	Vertex midPoint(const int p1, const int p2);
 
+	//----------------------------------------------------------------------------
+	// Sphere Parameters
 	int subdiv_;
 	float radius_;
 	glm::vec3 center_;

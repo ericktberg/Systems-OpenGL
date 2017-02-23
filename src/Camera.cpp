@@ -25,34 +25,3 @@ void Camera::setCamera() {
 		glm::vec3(0.f, 0.f, 1.f)
 	);
 }
-
-void Camera::renderEdgesFrom(const RenderableObject& object) {
-	Program* program = object.program();
-	program->bind();
-	program->setUniformMatrix4fv("camera", glm::value_ptr(matrix()));
-	object.renderEdges(GL_DYNAMIC_DRAW);
-}
-void Camera::renderPointsFrom(const RenderableObject& object) {
-	Program* program = object.program();
-	program->bind();
-	program->setUniformMatrix4fv("camera", glm::value_ptr(matrix()));
-	object.renderPoints(GL_DYNAMIC_DRAW);
-}
-void Camera::renderFacesFrom(const RenderableObject& object) {
-	Program* program = object.program();
-	program->bind();
-	program->setUniformMatrix4fv("camera", glm::value_ptr(matrix()));
-	program->setUniformVector3fv("lightPos1", 0, 10, 20);
-	program->setUniformVector3fv("lightPos2", 10, -10, 20);
-
-	object.renderFaces(GL_DYNAMIC_DRAW);
-}
-
-void Camera::renderSystem(const DynamicObject& object) {
-	Program* program = object.program();
-	program->bind();
-	program->setUniformMatrix4fv("camera", glm::value_ptr(matrix()));
-	program->setUniformVector3fv("lightPos1", 0, 10, 20);
-	program->setUniformVector3fv("lightPos2", 10, -10, 20);
-	object.render();
-}

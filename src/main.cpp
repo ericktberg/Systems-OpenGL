@@ -9,6 +9,7 @@
 #include <iostream>
 
 #include "Camera.h"
+#include "Scene.h"
 
 #include "Plane.h"
 #include "Sphere.h"
@@ -28,6 +29,18 @@ bool active = false;
 GLdouble mouse_x_g, mouse_y_g;
 bool mouse_drag_g = false;
 Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+Scene scene;
+
+static void diffuse() {
+	Program* new_program = new Program(0);
+	scene.addShader(new_program);
+}
+
+static void object() {
+	Program* new_program = new Program(1);
+	scene.addShader(new_program);
+}
 
 //----------------------------------------------------------------------------
 // function that is called whenever a key is pressed
@@ -144,24 +157,26 @@ int main() {
 	/**********************************
 	* Define buffer objects
 	***********************************/
-	RenderableObject axes(1);
-	axes.init();
+	int phong = scene.addShader(new Program(PHONG_NOSPEC));
+	int constant = scene.addShader(new Program(CONSTANT_COL));
 
-	Sphere sphere(.5, { 0, 0, 2 }, 3);
-	sphere.init();
+	//RenderableObject axes(GL_LINES);
 
-	Plane plane(2, 2, { .4, .1, .4, 1 }, 20, 20);
-	plane.init();
-	plane.translate({ -1, 0, 3 });
+	int sphere = scene.addObject(new Sphere(GL_TRIANGLES, .5, { 0, 0, 2 }, 3));
+	scene.assignShader(sphere, phong);
 
-	Plane ground(20, 20, { .6, .2, .2, 1 }, 20, 20);
-	ground.init();
+	Plane* plane = new Plane(GL_TRIANGLES, 2, 2, { .4, .1, .4, 1 }, 20, 20);
+	int plane_idx = scene.addObject(plane);
+	scene.translate(plane_idx, { -1, 0, 3 });
+	scene.assignShader(plane_idx, phong);
 
-	Cloth cloth;
-	cloth.init(&plane);
+	int ground = scene.addObject(new Plane(GL_LINES, 20, 20, { .6, .2, .2, 1 }, 20, 20));
+	scene.assignShader(ground, constant);
 
-	Sphere ball(.25, { 0, 3, 2 }, 3);
-	ball.init();
+	Cloth cloth(plane);
+
+	int ball = scene.addObject(new Sphere(GL_POINTS, .25, { 0, 3, 2 }, 3));
+	scene.assignShader(ball, constant);
 
 
 	int frames = 0;
@@ -188,12 +203,7 @@ int main() {
 		/**********************************
 		* Draw our objects
 		***********************************/
-
-		camera.renderEdgesFrom(axes);
-		camera.renderFacesFrom(sphere);
-		camera.renderEdgesFrom(ground);
-		camera.renderSystem(cloth);
-
+		scene.render(camera);
 		glfwSwapBuffers(window);
 		/**********************************
 		* Limit framerate

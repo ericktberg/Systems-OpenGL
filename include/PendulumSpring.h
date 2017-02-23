@@ -7,11 +7,11 @@
 class PendulumSpring : public DynamicObject
 {
 public:
-	PendulumSpring();
+	PendulumSpring(RenderableObject* object, Spline* spline);
 	~PendulumSpring();
+
 	void update(float dt);
-	void init(RenderableObject* object);
-	void render() const;
+	void render(Program*) const;
 private:
 	RenderableObject* object_;
 	glm::vec3 p1, p2;

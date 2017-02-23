@@ -5,33 +5,16 @@ float lerp(float a, float b, float f)
 	return (a * (1.0f - f)) + (b * f);
 }
 
-Plane::Plane(float width, float height, glm::vec4 color, int w_segments, int h_segments) 
+/****************************************************************************************
+* Constructors 
+*****************************************************************************************/
+Plane::Plane(GLenum mode, float width, float height, glm::vec4 color, int w_segments, int h_segments)
 	: width_(width), height_(height), color_(color),
 	w_segments_(w_segments + 1), h_segments_(h_segments + 1),
-	RenderableObject(0) 
+	RenderableObject(mode) 
 { 
 	triangulate_ = false;
 
-
-
-	gravity_ = { 0, 0, -2 };
-	velocity_ = { 0, 0, 0 };
-}
-
-
-Plane::Plane(float width, float height, 
-			int w_segments, int h_segments) 
-	: Plane(width, height, {.5f, .5f, .5f, 1}, w_segments, h_segments) {}
-
-Plane::Plane(float width, float height, glm::vec4 color) : Plane(width, height, color, 1, 1) {}
-Plane::Plane() : Plane(1, 1, 1, 1) {}
-
-Plane::~Plane() {
-
-}
-
-//TODO make more readable.
-void Plane::init() {
 	float w_start = -width_ / 2;
 	float h_start = -height_ / 2;
 	float w_end = width_ / 2;
@@ -39,7 +22,7 @@ void Plane::init() {
 
 	for (int w_idx = 0; w_idx < w_segments_; w_idx++) {
 		for (int h_idx = 0; h_idx < h_segments_; h_idx++) {
-			float w_step = (float)w_idx / (float) (w_segments_ - 1);
+			float w_step = (float)w_idx / (float)(w_segments_ - 1);
 			float h_step = (float)h_idx / (float)(h_segments_ - 1);
 
 			vertices_.push_back({ { lerp(w_start, w_end, w_step), lerp(h_start, h_end, h_step), 0 }, color_ });
@@ -69,6 +52,22 @@ void Plane::init() {
 	}
 }
 
+
+Plane::Plane(GLenum mode, float width, float height,
+			int w_segments, int h_segments) 
+	: Plane(mode, width, height, {.5f, .5f, .5f, 1}, w_segments, h_segments) {}
+
+Plane::Plane(GLenum mode, float width, float height, glm::vec4 color) : Plane(mode, width, height, color, 1, 1) {}
+Plane::Plane(GLenum mode) : Plane(mode, 1, 1, 1, 1) {}
+
+Plane::~Plane() {
+
+}
+
+
+/****************************************************************************************
+* Geometry
+*****************************************************************************************/
 // TODO: revisit
 std::vector<int> Plane::neighbors(int idx) const {
 	std::vector<int> v;
@@ -179,15 +178,4 @@ std::vector<int> Plane::neighbors(int idx) const {
 
 
 	return v;
-}
-
-void Plane::update(float dt, const Sphere& sphere) {
-	velocity_ += gravity_ * dt;
-
-	float t = sphere.collisionPoint(velocity_, position_);
-	if ( t >= 0 && t < dt) {
-		velocity_.z = 0;
-		gravity_.z = 0;
-	}
-	translate(velocity_*dt);
 }

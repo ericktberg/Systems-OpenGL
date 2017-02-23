@@ -4,10 +4,10 @@
 Program::Program(int type) {
 	program_id_ = glCreateProgram();
 	std::string f;
-	if (type) {
+	if (type == CONSTANT_COL) {
 		f = "shaders/Fragment/simpleFragment.glsl";
 	}
-	else {
+	else if (type == PHONG_NOSPEC)	{
 		f = "shaders/Fragment/diffuse.glsl";
 	}
 	Shader fragment(f, GL_FRAGMENT_SHADER);

@@ -21,10 +21,7 @@ public:
 	void dollyInc(float inc) { dolly_ += inc; }
 
 	glm::mat4 matrix() const { return proj_ * view_; }
-	void renderEdgesFrom(const RenderableObject& object);
-	void renderFacesFrom(const RenderableObject& object);
-	void renderPointsFrom(const RenderableObject& object);
-	void renderSystem(const DynamicObject& object);
+
 	void setCamera();
 
 private:

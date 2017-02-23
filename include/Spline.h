@@ -9,8 +9,7 @@ public:
 	
 	glm::vec3 vector() const;
 	
-	void movePoint(int idx, glm::vec3 displacement);
-	void init();
+	void vaoInit(Program*);
 
 private:
 };

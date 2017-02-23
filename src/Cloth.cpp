@@ -2,13 +2,10 @@
 #include "Plane.h"
 #include "Sphere.h"
 
-Cloth::Cloth() {}
-Cloth::~Cloth() {}
-
-void Cloth::init(Plane* plane) {
+Cloth::Cloth(Plane* plane) {
 	plane_ = plane;
 	nodes_.reserve(plane_->size());
-	
+
 	for (int i = 0; i < plane_->size(); i++){
 		Node* node = new Node;
 		std::vector<int> n = plane_->neighbors(i);
@@ -16,7 +13,7 @@ void Cloth::init(Plane* plane) {
 		node->velocity = { 0, 0, 0 };
 		node->acceleration = { 0, 0, -2 };
 		int j = 0;
-		while(j < 8) {
+		while (j < 8) {
 			node->shear[j / 2] = n[j];
 			j++;
 			node->stretch[j / 2] = n[j];
@@ -41,7 +38,8 @@ void Cloth::init(Plane* plane) {
 	rest_shear_ = sqrt(.1 * .1 * 2);
 	rest_bend_90_ = .2;
 	rest_bend_45_ = sqrt(.2 * .2 * 2);
-}	
+}
+Cloth::~Cloth() {}
 
 void Cloth::update(float dt) {
 
@@ -186,7 +184,7 @@ update(float det, const Sphere& sphere) {
 			if (node->pinned) {
 
 				node->position = node->last_pos + node->velocity*dt;
-				plane_->movePoint(i, node->velocity*dt);
+				plane_->editPoint(i, node->position);
 			}
 		}
 	}
@@ -196,6 +194,6 @@ update(float det, const Sphere& sphere) {
 	}
 }
 
-void Cloth::render() const {
-	plane_->renderEdges(GL_DYNAMIC_DRAW);
+void Cloth::render(Program* program) const {
+	plane_->render(program, GL_DYNAMIC_DRAW);
 }
