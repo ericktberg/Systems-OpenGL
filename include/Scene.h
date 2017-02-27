@@ -13,9 +13,19 @@ public:
 	~Scene();
 
 	void render(const Camera& camera) const;
+
+	RenderableObject* objectAt(int idx) const { return objects_.at(idx); }
+	Program* programAt(int idx) const { return programs_.at(idx); }
+	std::vector<RenderableObject*> objects() const { return objects_; }
 	
 	int addObject(RenderableObject* object) { objects_.push_back(object); return objects_.size() - 1; }
-	int addShader(Program* program) { programs_.push_back(program); return programs_.size() - 1; }
+	int addShader(Program* program) { 
+		programs_.push_back(program);
+		program->setUniformVector3fv("lightPos1", 2, 0, 10);
+		program->setUniformVector3fv("lightPos2", -2, 5, 10);
+
+		return programs_.size() - 1; 
+	}
 
 	void assignShader(int object_idx, int program_idx);
 	

@@ -18,11 +18,17 @@ public:
 	glm::vec3 point(int idx) const { return vertices_.at(idx).position; }
 	void editPoint(int idx, glm::vec3 newPoint) { vertices_.at(idx).position = newPoint; }
 
+	virtual glm::vec3 normal(glm::vec3 point) {	return{ 0, 0, 0 }; }
+	virtual float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const { return -1; }
+
+	glm::vec3 calcNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3) const;
+
 	int size() const { return vertices_.size(); }
 	//----------------------------------------------------------------------------
 	// Rendering
 	void prepareRender(Program* program) const;
 	void render(Program* program, GLenum usage) const;
+	void renderNormals(Program* program, GLenum usage) const;
 
 	//----------------------------------------------------------------------------
 	// Transformations
@@ -30,7 +36,7 @@ public:
 	virtual void translate(glm::mat4 translation) { translation_ = translation; }
 	virtual void scale(const glm::vec3& scale);
 	virtual void scale(glm::mat4 scale) { scale_ = scale; }
-	virtual void rotate(const glm::vec3& rotate);
+	virtual void rotate(float angle, const glm::vec3& axis);
 	virtual void rotate(glm::mat4 rotation) { rotation_ = rotation; }
 
 	glm::vec3 position() const { return position_; }
@@ -41,7 +47,7 @@ public:
 	//----------------------------------------------------------------------------
 	// Collisions
 	virtual bool intersectsGround(const glm::vec3& groundPlane) { return false; }
-	virtual float rayCollision(const glm::vec3& velocity, const glm::vec3& origin);
+	virtual float rayCollision(const glm::vec3& velocity, const glm::vec3& origin) { return -1; }
 
 protected:
 	//----------------------------------------------------------------------------
@@ -50,6 +56,7 @@ protected:
 	std::vector<Face> indices_;
 	std::vector<Edge> edges_;
 
+	std::vector<Vertex> normal_lines_;
 	//----------------------------------------------------------------------------
 	// Render
 	virtual void renderFaces(Program* program, GLenum usage) const;

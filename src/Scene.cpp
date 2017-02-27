@@ -17,11 +17,12 @@ render(const Camera& camera) const {
 		program->bind();
 		program->setUniformMatrix4fv("camera", glm::value_ptr(camera.matrix()));
 		object->render(program, GL_DYNAMIC_DRAW);
+		//object->renderNormals(program, GL_DYNAMIC_DRAW);
 	}
 }
 
 void Scene::
 assignShader(int object_idx, int program_idx) { 
 	objects_.at(object_idx)->vaoInit(programs_.at(program_idx));
-	program_map_.insert(object_idx, program_idx); 
+	program_map_[object_idx] = program_idx;
 }

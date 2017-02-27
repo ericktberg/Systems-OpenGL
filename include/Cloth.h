@@ -12,11 +12,9 @@ public:
 	Cloth(Plane*);
 	~Cloth();
 	void render(Program*) const;
-	void update(float dt);
-	void update(float dt, const Sphere&);
+	void update(float dt) { return; }
+	void update(float dt, const std::vector<RenderableObject*>& objects, int this_idx);
 	glm::vec3 calcNormals(Node*);
-
-	glm::vec3 calcNormal(Node* p1, Node* p2, Node* p3);
 
 private:
 

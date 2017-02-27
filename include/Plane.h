@@ -20,6 +20,7 @@ public:
 	//----------------------------------------------------------------------------
 	// Geometry
 	void updateNormal(int idx, glm::vec3 normal) { vertices_.at(idx).normal = normal; }
+	void calcNormals();
 
 private:
 	//----------------------------------------------------------------------------

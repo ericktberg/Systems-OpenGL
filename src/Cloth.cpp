@@ -2,6 +2,8 @@
 #include "Plane.h"
 #include "Sphere.h"
 
+#include <vector>
+
 Cloth::Cloth(Plane* plane) {
 	plane_ = plane;
 	nodes_.reserve(plane_->size());
@@ -10,6 +12,7 @@ Cloth::Cloth(Plane* plane) {
 		Node* node = new Node;
 		std::vector<int> n = plane_->neighbors(i);
 		node->position = plane_->point(i) + plane_->position();
+		node->last_pos = node->position;
 		node->velocity = { 0, 0, 0 };
 		node->acceleration = { 0, 0, -2 };
 		int j = 0;
@@ -26,7 +29,7 @@ Cloth::Cloth(Plane* plane) {
 
 		nodes_.push_back(node);
 		if (i < 21) {
-			node->pinned = false;
+			node->pinned = true;
 		}
 	}
 
@@ -40,10 +43,6 @@ Cloth::Cloth(Plane* plane) {
 	rest_bend_45_ = sqrt(.2 * .2 * 2);
 }
 Cloth::~Cloth() {}
-
-void Cloth::update(float dt) {
-
-}
 
 glm::vec3 Cloth::euler_velocity(float dt, Node* node) {
 	glm::vec3 stretch_force, shear_force, damp_force, bend_force;
@@ -89,32 +88,31 @@ drag(float dt, Node* node) {
 	return drag_force;
 }
 
+//----------------------------------------------------------------------------
+// Naively calculate normals through equal face weighting
 glm::vec3 Cloth::
 calcNormals(Node* node) {
 
 	glm::vec3 n;
 	for (int i = 0; i < 4; i++) {
 		bool x = node->shear[i] >= 0 && node->stretch[i] >= 0;
-		bool y = node->shear[(i + 1) < 4 ? i + 1 : i] >= 0 && node->stretch[i] >= 0;
+		bool y = node->shear[(i + 1) < 4 ? i + 1 : 0] >= 0 && node->stretch[i] >= 0;
 
 		if (x) {
 			Node* p1 = nodes_.at(node->shear[i]);
 			Node* p2 = nodes_.at(node->stretch[i]);
-			n += calcNormal(node, p1, p2);
+			glm::vec3 s = glm::normalize(plane_->calcNormal(node->position, p1->position, p2->position));
+			n += s;
 
 		}
 		if (y) {
 			Node* p2 = nodes_.at(node->stretch[i]);
-			Node* p3 = nodes_.at(node->shear[(i + 1) < 4 ? i + 1 : i]);
-			n += calcNormal(node, p2, p3);
+			Node* p3 = nodes_.at(node->shear[(i + 1) < 4 ? i + 1 : 0]);
+			glm::vec3 s = glm::normalize(plane_->calcNormal(node->position, p2->position, p3->position));
+			n += s;
 		}
 	}
 	return glm::normalize(n);
-}
-
-glm::vec3 Cloth::
-calcNormal(Node* p1, Node* p2, Node* p3) {
-	return glm::cross((p2->position - p1->position), (p3->position, p1->position));
 }
 
 // TODO general and more realistic collisions.
@@ -130,7 +128,7 @@ calcNormal(Node* p1, Node* p2, Node* p3) {
 // Weak, non-linear bend springs on outer ring
 
 void Cloth::
-update(float det, const Sphere& sphere) {
+update(float det, const std::vector<RenderableObject*>& objects, int this_idx) {
 	float dt = .001;
 	int step = det / dt;
 	
@@ -142,7 +140,7 @@ update(float det, const Sphere& sphere) {
 		***********************************/
 		for (int i = 0; i < nodes_.size(); i++) {
 			Node* node = nodes_.at(i);
-			if (node->pinned) {
+			if (!node->pinned) {
 				node->last_vel = node->velocity;
 				glm::vec3 springs = euler_velocity(dt * .5, node);
 				node->velocity += drag(dt * .5, node) + springs;
@@ -150,7 +148,7 @@ update(float det, const Sphere& sphere) {
 		}
 		for (int i = 0; i < nodes_.size(); i++) {
 				Node* node = nodes_.at(i);
-			if (node->pinned) {
+			if (!node->pinned) {
 				node->last_pos = node->position;
 				node->position += node->velocity * dt * .5f;
 			}
@@ -160,17 +158,29 @@ update(float det, const Sphere& sphere) {
 		***********************************/
 		for (int i = 0; i < nodes_.size(); i++) {
 			Node* node = nodes_.at(i);
-			if (node->pinned) {
+			if (!node->pinned) {
 
 				glm::vec3 springs = euler_velocity(dt, node);
 				node->velocity = node->last_vel + drag(dt, node) + springs;
 
-				float t = sphere.collisionPoint(node->velocity, node->/*position*/last_pos);
-				glm::vec3 point = node->velocity * t + node->/*position*/last_pos;
-				glm::vec3 n = glm::normalize(point - sphere.center());
+				// find collision
+				float t = dt + 1, test;
+				RenderableObject* intersected;
+				for (int i = 0; i < objects.size(); i++) {
+					if (i != this_idx) {
+						test = objects.at(i)->collisionPoint(node->velocity, node->last_pos);
+						if (test >= 0 && test < t) {
+							t = test;
+							intersected = objects.at(i);
+						}
+					}
+				}
+
 
 				if (t >= 0 && t < dt) {
 					//node->last_pos = n * 1.001f + sphere.center();
+					glm::vec3 point = node->velocity * t + node->/*position*/last_pos;
+					glm::vec3 n = intersected->normal(point);
 					node->velocity = -n * glm::dot(node->velocity, n);
 				}
 				else if (node->velocity.z * dt + node->last_pos.z < 0) {
@@ -181,16 +191,17 @@ update(float det, const Sphere& sphere) {
 		for (int i = 0; i < nodes_.size(); i++) {
 
 			Node* node = nodes_.at(i);
-			if (node->pinned) {
+			if (!node->pinned) {
 
 				node->position = node->last_pos + node->velocity*dt;
-				plane_->editPoint(i, node->position);
+				plane_->editPoint(i, node->position - plane_->position());
 			}
 		}
 	}
 	// update normals
 	for (int i = 0; i < nodes_.size(); i++) {
 		plane_->updateNormal(i, calcNormals(nodes_.at(i)));
+		plane_->calcNormals();
 	}
 }
 

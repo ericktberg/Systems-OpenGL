@@ -148,6 +148,7 @@ int main() {
 	***********************************/
 	glEnable(GL_BLEND); glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glClearColor(.95, .93, .93, 1);
 	/**********************************
 	* Define GLFW input callbacks
 	***********************************/
@@ -166,6 +167,7 @@ int main() {
 	scene.assignShader(sphere, phong);
 
 	Plane* plane = new Plane(GL_TRIANGLES, 2, 2, { .4, .1, .4, 1 }, 20, 20);
+	plane->calcNormals();
 	int plane_idx = scene.addObject(plane);
 	scene.translate(plane_idx, { -1, 0, 3 });
 	scene.assignShader(plane_idx, phong);
@@ -209,7 +211,8 @@ int main() {
 		* Limit framerate
 		***********************************/
 		if (active){
-			cloth.update(time > .03 ? .03 : time, sphere);
+			// TODO: cloth should keep track of its object indices
+			cloth.update(time > .03 ? .03 : time, scene.objects(), plane_idx);
 		}
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}

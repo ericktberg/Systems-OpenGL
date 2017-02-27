@@ -19,6 +19,12 @@ RenderableObject::
 	glDeleteVertexArrays(1, &vao_);
 }
 
+glm::vec3 RenderableObject::
+calcNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3) const {
+	return glm::cross((p2 - p1), (p3 - p1));
+}
+
+
 //----------------------------------------------------------------------------
 // Create axes by default
 void RenderableObject::
@@ -74,7 +80,8 @@ void RenderableObject::renderEdges(Program* program, GLenum usage) const {
 }
 //----------------------------------------------------------------------------
 // Render model using GL_POINTS
-void RenderableObject::renderPoints(Program* program, GLenum usage) const {
+void RenderableObject::
+renderPoints(Program* program, GLenum usage) const {
 	prepareRender(program);
 	
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, edges_.size() * sizeof(Edge), edges_.data(), usage);
@@ -84,9 +91,20 @@ void RenderableObject::renderPoints(Program* program, GLenum usage) const {
 // TODO optimize?
 //----------------------------------------------------------------------------
 // Displace all vertices equally
-void RenderableObject::translate(const glm::vec3& displacement) {
+void RenderableObject::
+translate(const glm::vec3& displacement) {
 	position_ += displacement;
 	translation_ = glm::translate(translation_, displacement );
+}
+
+void RenderableObject::
+scale(const glm::vec3& scale) {
+	scale_ = glm::scale(scale_, scale);
+}
+
+void RenderableObject::
+rotate(float angle, const glm::vec3& axis) {
+	rotation_ = glm::rotate(rotation_, angle, axis);
 }
 
 void RenderableObject::render(Program* program, GLenum usage) const {
@@ -106,6 +124,14 @@ void RenderableObject::render(Program* program, GLenum usage) const {
 		std::cerr << "No render mode found." << std::endl;
 		return;
 	}
+}
+
+void RenderableObject::
+renderNormals(Program* program, GLenum usage_) const {
+	prepareRender(program);
+
+	glBufferData(GL_ARRAY_BUFFER, normal_lines_.size() * sizeof(Vertex), normal_lines_.data(), GL_DYNAMIC_DRAW);
+	glDrawArrays(GL_LINES, 0, normal_lines_.size());
 }
 
 /* axes stuff */

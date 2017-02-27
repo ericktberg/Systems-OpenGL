@@ -31,9 +31,14 @@ protected:
 		int bend[8];
 
 		// Status variables
-		bool pinned = true;
+		bool pinned = false;
 
 	};
+	
+	glm::vec3 euler_integrate();
+
+	glm::vec3 midpoint_integrate();
+
 	std::vector<Node*> nodes_;
 
 	virtual glm::vec3 bounce(

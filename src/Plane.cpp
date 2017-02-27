@@ -15,23 +15,36 @@ Plane::Plane(GLenum mode, float width, float height, glm::vec4 color, int w_segm
 { 
 	triangulate_ = false;
 
+	/**********************************
+	* Dimensions
+	***********************************/
 	float w_start = -width_ / 2;
 	float h_start = -height_ / 2;
 	float w_end = width_ / 2;
 	float h_end = height_ / 2;
 
+	/**********************************
+	* Create even vertex grid
+	***********************************/
 	for (int w_idx = 0; w_idx < w_segments_; w_idx++) {
 		for (int h_idx = 0; h_idx < h_segments_; h_idx++) {
 			float w_step = (float)w_idx / (float)(w_segments_ - 1);
 			float h_step = (float)h_idx / (float)(h_segments_ - 1);
 
-			vertices_.push_back({ { lerp(w_start, w_end, w_step), lerp(h_start, h_end, h_step), 0 }, color_ });
+			vertices_.push_back({ { lerp(w_start, w_end, w_step), 
+									lerp(h_start, h_end, h_step), 
+									0 }, color_, { 0, 0, 1 } });
 		}
 	}
+
+	/**********************************
+	* Find edges and faces
+	***********************************/
 	int idx = 0;
 	for (int i = 0; i < w_segments_; i++) {
 		for (int j = 0; j < h_segments_; j++) {
 			idx = j + i * h_segments_;
+			
 			if (idx + h_segments_ < w_segments_ * h_segments_) {
 				edges_.push_back({ idx, idx + h_segments_ });
 			}
@@ -64,6 +77,15 @@ Plane::~Plane() {
 
 }
 
+void Plane::
+calcNormals() {
+	normal_lines_.clear();
+	for (int i = 0; i < vertices_.size(); i++) {
+		Vertex vertex = vertices_.at(i);
+		normal_lines_.push_back({ vertex.position, { 0, 0, 1, 1 }, { 0, 0, 0 } });
+		normal_lines_.push_back({ vertex.position + .3f * vertex.normal, { 0, 1, 1, 1 }, { 0, 0, 0 } });
+	}
+}
 
 /****************************************************************************************
 * Geometry
