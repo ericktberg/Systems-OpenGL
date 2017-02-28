@@ -52,6 +52,15 @@ Sphere::Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv) :
 		edges_.push_back({ at.a, at.c });
 		edges_.push_back({ at.b, at.c });
 	}
+	
+	/**********************************
+	* Calculate normal lines
+	***********************************/
+	for (int i = 0; i < vertices_.size(); i++) {
+		glm::vec3 pos = vertices_.at(i).position;
+		normal_lines_.push_back({ pos, { 0, 0, 1, 1 } });
+		normal_lines_.push_back({ (pos + .3f * radius_ * glm::normalize(pos)), { 0, 1, 1, 1 } });
+	}
 
 	/**********************************
 	* Move translation coordinates
@@ -59,7 +68,7 @@ Sphere::Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv) :
 	translate(center_);
 
 	// HACK for collisions
-	radius_ = radius_ + .1;
+	radius_ = radius_ + .01;
 }
 
 Sphere::Sphere(GLenum mode, float radius, glm::vec3 center) : Sphere(mode, radius, center, 2) {}

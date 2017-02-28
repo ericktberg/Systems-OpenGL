@@ -29,7 +29,7 @@ Cloth::Cloth(Plane* plane) {
 
 		nodes_.push_back(node);
 		if (i < 21) {
-			node->pinned = true;
+			//node->pinned = true;
 		}
 	}
 
@@ -166,12 +166,12 @@ update(float det, const std::vector<RenderableObject*>& objects, int this_idx) {
 				// find collision
 				float t = dt + 1, test;
 				RenderableObject* intersected;
-				for (int i = 0; i < objects.size(); i++) {
-					if (i != this_idx) {
-						test = objects.at(i)->collisionPoint(node->velocity, node->last_pos);
+				for (int j = 0; j < objects.size(); j++) {
+					if (j != this_idx) {
+						test = objects.at(j)->collisionPoint(node->velocity, node->last_pos);
 						if (test >= 0 && test < t) {
 							t = test;
-							intersected = objects.at(i);
+							intersected = objects.at(j);
 						}
 					}
 				}
@@ -181,7 +181,8 @@ update(float det, const std::vector<RenderableObject*>& objects, int this_idx) {
 					//node->last_pos = n * 1.001f + sphere.center();
 					glm::vec3 point = node->velocity * t + node->/*position*/last_pos;
 					glm::vec3 n = intersected->normal(point);
-					node->velocity = -n * glm::dot(node->velocity, n);
+					glm::vec3 vel = 2.f * -n * glm::dot(node->velocity, n);
+					node->velocity += vel;
 				}
 				else if (node->velocity.z * dt + node->last_pos.z < 0) {
 					node->velocity.z = .8 * abs(node->velocity.z);
@@ -194,11 +195,13 @@ update(float det, const std::vector<RenderableObject*>& objects, int this_idx) {
 			if (!node->pinned) {
 
 				node->position = node->last_pos + node->velocity*dt;
+				// TODO: rework to avoid subtraction here.
 				plane_->editPoint(i, node->position - plane_->position());
 			}
 		}
 	}
 	// update normals
+	// TODO: move this into plane
 	for (int i = 0; i < nodes_.size(); i++) {
 		plane_->updateNormal(i, calcNormals(nodes_.at(i)));
 		plane_->calcNormals();

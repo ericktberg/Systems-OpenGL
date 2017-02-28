@@ -17,7 +17,7 @@ render(const Camera& camera) const {
 		program->bind();
 		program->setUniformMatrix4fv("camera", glm::value_ptr(camera.matrix()));
 		object->render(program, GL_DYNAMIC_DRAW);
-		//object->renderNormals(program, GL_DYNAMIC_DRAW);
+		object->renderNormals(program, GL_DYNAMIC_DRAW);
 	}
 }
 

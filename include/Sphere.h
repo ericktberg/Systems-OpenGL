@@ -20,7 +20,7 @@ public:
 	float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const;
 
 	glm::vec3 normal(glm::vec3 point) {
-		return point - center_;
+		return glm::normalize(point - center_);
 	}
 	
 	//----------------------------------------------------------------------------
