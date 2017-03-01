@@ -21,7 +21,31 @@ RenderableObject::
 
 glm::vec3 RenderableObject::
 calcNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3) const {
-	return glm::cross((p2 - p1), (p3 - p1));
+	return glm::normalize(glm::cross((p2 - p1), (p3 - p1)));
+}
+
+void RenderableObject::
+calcNormals() {
+	normal_lines_.clear();
+	for (int i = 0; i < vertices_.size(); i++) {
+		updateNormal(i, { 0, 0, 0 });
+	}
+
+	for (int face_idx = 0; face_idx < indices_.size(); face_idx++) {
+		Face f = indices_.at(face_idx);
+		glm::vec3 n = calcNormal(point(f.a),
+			point(f.b),
+			point(f.c));
+		incrementNormal(f.a, n);
+		incrementNormal(f.b, n);
+		incrementNormal(f.c, n);
+	}
+
+	for (int i = 0; i < vertices_.size(); i++) {
+		Vertex vertex = vertices_.at(i);
+		normal_lines_.push_back({ vertex.position, { 0, 0, 1, 1 }, { 0, 0, 0 } });
+		normal_lines_.push_back({ vertex.position + .3f * vertex.normal, { 0, 1, 1, 1 }, { 0, 0, 0 } });
+	}
 }
 
 
@@ -108,6 +132,10 @@ rotate(float angle, const glm::vec3& axis) {
 }
 
 void RenderableObject::render(Program* program, GLenum usage) const {
+	if (visible_normals_) {
+		renderNormals(program, usage);
+	}
+
 	if (mode_ == GL_POINTS) {
 		renderPoints(program, usage);
 	}

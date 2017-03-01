@@ -88,33 +88,6 @@ drag(float dt, Node* node) {
 	return drag_force;
 }
 
-//----------------------------------------------------------------------------
-// Naively calculate normals through equal face weighting
-glm::vec3 Cloth::
-calcNormals(Node* node) {
-
-	glm::vec3 n;
-	for (int i = 0; i < 4; i++) {
-		bool x = node->shear[i] >= 0 && node->stretch[i] >= 0;
-		bool y = node->shear[(i + 1) < 4 ? i + 1 : 0] >= 0 && node->stretch[i] >= 0;
-
-		if (x) {
-			Node* p1 = nodes_.at(node->shear[i]);
-			Node* p2 = nodes_.at(node->stretch[i]);
-			glm::vec3 s = glm::normalize(plane_->calcNormal(node->position, p1->position, p2->position));
-			n += s;
-
-		}
-		if (y) {
-			Node* p2 = nodes_.at(node->stretch[i]);
-			Node* p3 = nodes_.at(node->shear[(i + 1) < 4 ? i + 1 : 0]);
-			glm::vec3 s = glm::normalize(plane_->calcNormal(node->position, p2->position, p3->position));
-			n += s;
-		}
-	}
-	return glm::normalize(n);
-}
-
 // TODO general and more realistic collisions.
 // TODO spatial structure for collisions?
 // TODO better integration (RK4?) (IMEX?)
@@ -201,11 +174,7 @@ update(float det, const std::vector<RenderableObject*>& objects, int this_idx) {
 		}
 	}
 	// update normals
-	// TODO: move this into plane
-	for (int i = 0; i < nodes_.size(); i++) {
-		plane_->updateNormal(i, calcNormals(nodes_.at(i)));
-		plane_->calcNormals();
-	}
+	plane_->calcNormals();
 }
 
 void Cloth::render(Program* program) const {

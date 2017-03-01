@@ -19,6 +19,7 @@
 #include "Cloth.h"
 #include "PendulumSpring.h"
 #include "Projectile.h"
+#include "ShallowWater.h"
 
 #define PI 3.14159
 #define WINDOW_WIDTH 800
@@ -124,6 +125,28 @@ void createWindow(GLFWwindow** window, int height, int width) {
 	glfwMakeContextCurrent(*window);
 }
 
+void clothSim() {
+	int phong = scene.addShader(new Program(PHONG_NOSPEC));
+	int constant = scene.addShader(new Program(CONSTANT_COL));
+
+	int sphere = scene.addObject(new Sphere(GL_TRIANGLES, .5, { 0, 0, 2 }, 3));
+	scene.assignShader(sphere, phong);
+
+	Plane* plane = new Plane(GL_TRIANGLES, 2, 2, { .4, .1, .4, 1 }, 20, 20);
+	plane->calcNormals();
+	int plane_idx = scene.addObject(plane);
+	scene.translate(plane_idx, { -1, 0, 3 });
+	scene.assignShader(plane_idx, phong);
+
+	int ground = scene.addObject(new Plane(GL_LINES, 20, 20, { .6, .2, .2, 1 }, 20, 20));
+	scene.assignShader(ground, constant);
+
+	Cloth cloth(plane);
+
+	int ball = scene.addObject(new Sphere(GL_POINTS, .25, { 0, 3, 2 }, 3));
+	scene.assignShader(ball, constant);
+}
+
 
 int main() {
 	auto t_start = std::chrono::high_resolution_clock::now();
@@ -161,25 +184,27 @@ int main() {
 	int phong = scene.addShader(new Program(PHONG_NOSPEC));
 	int constant = scene.addShader(new Program(CONSTANT_COL));
 
-	//RenderableObject axes(GL_LINES);
-
-	int sphere = scene.addObject(new Sphere(GL_TRIANGLES, .5, { 0, 0, 2 }, 3));
-	scene.assignShader(sphere, phong);
-
-	Plane* plane = new Plane(GL_TRIANGLES, 2, 2, { .4, .1, .4, 1 }, 20, 20);
+	/* 1D fluid simulation */
+	/*Plane* plane = new Plane(GL_TRIANGLES, 10, 1, { 0, .1, .8, 1 }, 100, 1);
 	plane->calcNormals();
 	int plane_idx = scene.addObject(plane);
-	scene.translate(plane_idx, { -1, 0, 3 });
 	scene.assignShader(plane_idx, phong);
+	ShallowWater water(plane, ONE_DIMENSION);
 
-	int ground = scene.addObject(new Plane(GL_LINES, 20, 20, { .6, .2, .2, 1 }, 20, 20));
-	scene.assignShader(ground, constant);
+	Plane* plane2 = new Plane(GL_LINES, 10, 1, { 0, .1, .8, 1 }, 100, 1);
+	plane2->calcNormals();
+	plane2->translate({ 0, 2, 0 });
+	int plane_idx2 = scene.addObject(plane2);
+	scene.assignShader(plane_idx2, phong);
+	ShallowWater water2(plane2, ONE_DIMENSION);*/
 
-	Cloth cloth(plane);
-
-	int ball = scene.addObject(new Sphere(GL_POINTS, .25, { 0, 3, 2 }, 3));
-	scene.assignShader(ball, constant);
-
+	/* 2D fluid simulation */
+	Plane* plane = new Plane(GL_LINES, 10, 10, { 0, .1, .8, 1 }, 100, 100);
+	plane->normalVisible(false);
+	plane->calcNormals();
+	int plane_idx = scene.addObject(plane);
+	scene.assignShader(plane_idx, phong);
+	ShallowWater water(plane, TWO_DIMENSION);
 
 	int frames = 0;
 	double total_time = 0;
@@ -211,8 +236,8 @@ int main() {
 		* Limit framerate
 		***********************************/
 		if (active){
-			// TODO: cloth should keep track of its object indices
-			cloth.update(time > .03 ? .03 : time, scene.objects(), plane_idx);
+			water.update(time > .033 ? .033 : time, scene.objects(), plane_idx);
+			//water2.update(time > .033 ? .033 : time, scene.objects(), plane_idx2);
 		}
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}

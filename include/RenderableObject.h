@@ -19,16 +19,21 @@ public:
 	void editPoint(int idx, glm::vec3 newPoint) { vertices_.at(idx).position = newPoint; }
 
 	virtual glm::vec3 normal(glm::vec3 point) {	return{ 0, 0, 0 }; }
-	virtual float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const { return -1; }
 
-	glm::vec3 calcNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3) const;
+	void updateNormal(int idx, glm::vec3 normal) { vertices_.at(idx).normal = normal; }
+	void incrementNormal(int idx, glm::vec3 normal) 
+		{ vertices_.at(idx).normal = glm::normalize(vertices_.at(idx).normal + normal); }
 
 	int size() const { return vertices_.size(); }
 	//----------------------------------------------------------------------------
 	// Rendering
 	void prepareRender(Program* program) const;
 	void render(Program* program, GLenum usage) const;
-	void renderNormals(Program* program, GLenum usage) const;
+
+	void normalVisible(bool state) { visible_normals_ = state; }
+	void calcNormals();
+	glm::vec3 calcNormal(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3) const;
+
 
 	//----------------------------------------------------------------------------
 	// Transformations
@@ -48,6 +53,9 @@ public:
 	// Collisions
 	virtual bool intersectsGround(const glm::vec3& groundPlane) { return false; }
 	virtual float rayCollision(const glm::vec3& velocity, const glm::vec3& origin) { return -1; }
+	// deprecated
+	virtual float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const { return -1; }
+
 
 protected:
 	//----------------------------------------------------------------------------
@@ -56,12 +64,15 @@ protected:
 	std::vector<Face> indices_;
 	std::vector<Edge> edges_;
 
+	bool visible_normals_;
 	std::vector<Vertex> normal_lines_;
 	//----------------------------------------------------------------------------
 	// Render
 	virtual void renderFaces(Program* program, GLenum usage) const;
 	virtual void renderEdges(Program* program, GLenum usage) const;
 	virtual void renderPoints(Program* program, GLenum usage) const;
+	virtual void renderNormals(Program* program, GLenum usage) const;
+
 	GLenum mode_;
 	GLuint vbo_, vao_, ebo_;
 

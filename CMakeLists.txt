@@ -27,6 +27,7 @@ set(SOURCES
 	src/RenderableObject.cpp
 	src/Scene.cpp
 	src/Shader.cpp
+	src/ShallowWater.cpp
 	src/Sphere.cpp
 	src/Spline.cpp
 	src/Subdivider.cpp
@@ -46,6 +47,7 @@ set(HEADERS
 	include/RenderableObject.h
 	include/Scene.h
 	include/Shader.h
+	include/ShallowWater.h
 	include/Sphere.h
 	include/Spline.h
 	include/Subdivider.h

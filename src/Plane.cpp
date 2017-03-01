@@ -77,16 +77,6 @@ Plane::~Plane() {
 
 }
 
-void Plane::
-calcNormals() {
-	normal_lines_.clear();
-	for (int i = 0; i < vertices_.size(); i++) {
-		Vertex vertex = vertices_.at(i);
-		normal_lines_.push_back({ vertex.position, { 0, 0, 1, 1 }, { 0, 0, 0 } });
-		normal_lines_.push_back({ vertex.position + .3f * vertex.normal, { 0, 1, 1, 1 }, { 0, 0, 0 } });
-	}
-}
-
 /****************************************************************************************
 * Geometry
 *****************************************************************************************/

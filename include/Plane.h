@@ -17,10 +17,14 @@ public:
 	// Information
 	std::vector<int> neighbors(int idx) const;
 
+	float width() const { return width_; }
+	float height() const { return height_; }
+	int widthSegs() const { return w_segments_; }
+	int heightSegs() const { return h_segments_; }
+
 	//----------------------------------------------------------------------------
 	// Geometry
-	void updateNormal(int idx, glm::vec3 normal) { vertices_.at(idx).normal = normal; }
-	void calcNormals();
+
 
 private:
 	//----------------------------------------------------------------------------
