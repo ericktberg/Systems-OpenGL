@@ -24,10 +24,9 @@ ShallowWater(Plane* plane,
 					, 0)
 {
 	plane_->translate({ 0, 0, 1 });
-	h_.at(500) += 5;
-	//h_.at(10) += 10;
-	//h_.at(11) += 6;
-	//h_.at(9) += 6;
+	h_.at(10) += 10;
+	h_.at(11) += 6;
+	h_.at(9) += 6;
 }
 
 ShallowWater::
@@ -215,16 +214,19 @@ idx(int i, int j) const {
 void ShallowWater::
 applyUpdate() {
 	for (int w = 0; w < x_segs_; w++) {
-		for (int h = 0; h < y_segs_; h++) {
-			int i = h + w * y_segs_;
-			glm::vec3 point = plane_->point(i);
-			float height = h_.at(i);
+		if (dimension_ == ONE_DIMENSION) {
+			float height = h_.at(w);
 
 			if (height != height) { // is NaN
 				return;
 			}
+			for (int h = 0; h < y_segs_; h++) {
+				int i = w * y_segs_ + h;
+				glm::vec3 point = plane_->point(i);
 
-			plane_->editPoint(i, glm::vec3( point.x, point.y, height));
+
+ 				plane_->editPoint(i, glm::vec3(point.x, point.y, height));
+			}
 		}
 	}
 

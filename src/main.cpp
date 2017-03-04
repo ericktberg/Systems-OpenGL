@@ -7,6 +7,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <thread>
 
 #include "Camera.h"
 #include "Scene.h"
@@ -185,15 +186,15 @@ int main() {
 	int constant = scene.addShader(new Program(CONSTANT_COL));
 
 	/* 1D fluid simulation */
-	Plane* plane = new Plane(GL_TRIANGLES, 30, 10, { 0, .1, .8, 1 }, 30, 1);
+	Plane* plane = new Plane(GL_TRIANGLES, 100, 10, { 0, .1, .8, 1 }, 100, 1);
 	plane->calcNormals();
 	int plane_idx = scene.addObject(plane);
 	scene.assignShader(plane_idx, phong);
 	ShallowWater water(plane, ONE_DIMENSION);
 
-	Plane* plane2 = new Plane(GL_TRIANGLES, 100, 10, { 0, .1, .8, 1 }, 100, 1);
+	Plane* plane2 = new Plane(GL_TRIANGLES, 30, 5, { 0, .1, .8, 1 }, 30, 1);
 	plane2->calcNormals();
-	plane2->translate({ 0, 20, 0 });
+	plane2->translate({ 0, 10, 0 });
 	int plane_idx2 = scene.addObject(plane2);
 	scene.assignShader(plane_idx2, phong);
 	ShallowWater water2(plane2, ONE_DIMENSION);
@@ -206,11 +207,10 @@ int main() {
 	//scene.assignShader(plane_idx, phong);
 	//ShallowWater water(plane, TWO_DIMENSION);
 
-	int frames = 0;
-	double total_time = 0;
 	auto t_now = t_start, t_last = t_start;
 	camera.setCamera();
-
+	int frames = 0;
+	double total_time = 0;
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 		/**********************************
@@ -237,12 +237,16 @@ int main() {
 		***********************************/
 		if (active){
 			water.update(time > .033 ? .033 : time, scene.objects(), plane_idx);
-			//water2.update(time > .033 ? .033 : time, scene.objects(), plane_idx2);
+			water2.update(time > .033 ? .033 : time, scene.objects(), plane_idx2);
 		}
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}
 
+
 	glfwDestroyWindow(window);
+	double fps = frames / total_time;
+	std::cerr << "\nAverage FPS: " << fps << std::endl;
+	std::this_thread::sleep_for(std::chrono::seconds(5));
 
 	glfwTerminate();
 	exit(EXIT_SUCCESS);
