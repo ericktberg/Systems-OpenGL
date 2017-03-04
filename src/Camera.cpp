@@ -5,10 +5,10 @@
 #include "Program.h"
 
 Camera::Camera(float window_width, float window_height) {
-	proj_ = glm::perspective(glm::radians(45.0f), window_width / window_height, 1.0f, 100.0f);
+	proj_ = glm::perspective(glm::radians(45.0f), window_width / window_height, 1.0f, 1000.0f);
 	rot_v_ = 45;
 	rot_u_ = 45;
-	dolly_ = 14.14;
+	dolly_ = 14.14 * 10;
 }
 
 Camera::~Camera() {}

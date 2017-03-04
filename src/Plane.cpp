@@ -13,7 +13,7 @@ Plane::Plane(GLenum mode, float width, float height, glm::vec4 color, int w_segm
 	w_segments_(w_segments + 1), h_segments_(h_segments + 1),
 	RenderableObject(mode) 
 { 
-	triangulate_ = false;
+	triangulate_ = true;
 
 	/**********************************
 	* Dimensions

@@ -185,26 +185,26 @@ int main() {
 	int constant = scene.addShader(new Program(CONSTANT_COL));
 
 	/* 1D fluid simulation */
-	/*Plane* plane = new Plane(GL_TRIANGLES, 10, 1, { 0, .1, .8, 1 }, 100, 1);
+	Plane* plane = new Plane(GL_TRIANGLES, 30, 10, { 0, .1, .8, 1 }, 30, 1);
 	plane->calcNormals();
 	int plane_idx = scene.addObject(plane);
 	scene.assignShader(plane_idx, phong);
 	ShallowWater water(plane, ONE_DIMENSION);
 
-	Plane* plane2 = new Plane(GL_LINES, 10, 1, { 0, .1, .8, 1 }, 100, 1);
+	Plane* plane2 = new Plane(GL_TRIANGLES, 100, 10, { 0, .1, .8, 1 }, 100, 1);
 	plane2->calcNormals();
-	plane2->translate({ 0, 2, 0 });
+	plane2->translate({ 0, 20, 0 });
 	int plane_idx2 = scene.addObject(plane2);
 	scene.assignShader(plane_idx2, phong);
-	ShallowWater water2(plane2, ONE_DIMENSION);*/
+	ShallowWater water2(plane2, ONE_DIMENSION);
 
 	/* 2D fluid simulation */
-	Plane* plane = new Plane(GL_LINES, 10, 10, { 0, .1, .8, 1 }, 100, 100);
-	plane->normalVisible(false);
-	plane->calcNormals();
-	int plane_idx = scene.addObject(plane);
-	scene.assignShader(plane_idx, phong);
-	ShallowWater water(plane, TWO_DIMENSION);
+	//Plane* plane = new Plane(GL_TRIANGLES, 30, 30, { 0, .1, .8, 1 }, 30, 30);
+	//plane->normalVisible(false);
+	//plane->calcNormals();
+	//int plane_idx = scene.addObject(plane);
+	//scene.assignShader(plane_idx, phong);
+	//ShallowWater water(plane, TWO_DIMENSION);
 
 	int frames = 0;
 	double total_time = 0;

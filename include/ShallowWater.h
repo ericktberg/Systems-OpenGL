@@ -16,7 +16,7 @@
 
 class ShallowWater {
 public:
-	ShallowWater(Plane* plane, int dimensions, int boundary_condition = PERIODIC);
+	ShallowWater(Plane* plane, int dimensions, int boundary_condition = REFLECT);
 	~ShallowWater();
 
 	void update(float dt, const std::vector<RenderableObject*>& objects, int this_idx);
@@ -25,10 +25,16 @@ private:
 	void update1D(float dt, const std::vector<RenderableObject*>& objects, int this_idx);
 	void update2D(float dt, const std::vector<RenderableObject*>& objects, int this_idx);
 
+	//----------------------------------------------------------------------------
+	// index into 1d array using 2d coordinates
+	int idx(int i, int j) const;
+
+	int x_segs_, y_segs_;
+
 	Plane* plane_;
 
-	std::vector<float> height_,
-					   momentum_;
+	std::vector<float> h_,
+					   uh_, vh_;
 
 	int dimension_, boundary_condition_;
 };
