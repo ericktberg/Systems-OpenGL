@@ -12,6 +12,7 @@
 #include "Camera.h"
 #include "Scene.h"
 
+#include "Digraph.h"
 #include "Plane.h"
 #include "Sphere.h"
 #include "Spline.h"
@@ -185,27 +186,30 @@ int main() {
 	int phong = scene.addShader(new Program(PHONG_NOSPEC));
 	int constant = scene.addShader(new Program(CONSTANT_COL));
 
-	/* 1D fluid simulation */
-	Plane* plane = new Plane(GL_TRIANGLES, 100, 10, { 0, .1, .8, 1 }, 100, 1);
-	plane->calcNormals();
-	int plane_idx = scene.addObject(plane);
+	/* floor */
+	int plane_idx = scene.addObject(new Plane(GL_TRIANGLES, 100, 100, { .6, .6, .6, 1 }, 1, 1));
 	scene.assignShader(plane_idx, phong);
-	ShallowWater water(plane, ONE_DIMENSION);
 
-	Plane* plane2 = new Plane(GL_TRIANGLES, 30, 5, { 0, .1, .8, 1 }, 30, 1);
-	plane2->calcNormals();
-	plane2->translate({ 0, 10, 0 });
-	int plane_idx2 = scene.addObject(plane2);
-	scene.assignShader(plane_idx2, phong);
-	ShallowWater water2(plane2, ONE_DIMENSION);
+	int sphere1_idx = scene.addObject(
+		new Sphere(GL_TRIANGLES, 5, { 0, 30, 0 }, 2, { .2f, .8f, 0.f, 1 }));
+	scene.assignShader(sphere1_idx, phong);
 
-	/* 2D fluid simulation */
-	//Plane* plane = new Plane(GL_TRIANGLES, 30, 30, { 0, .1, .8, 1 }, 30, 30);
-	//plane->normalVisible(false);
-	//plane->calcNormals();
-	//int plane_idx = scene.addObject(plane);
-	//scene.assignShader(plane_idx, phong);
-	//ShallowWater water(plane, TWO_DIMENSION);
+	int sphere2_idx = scene.addObject(
+		new Sphere(GL_TRIANGLES, 10, { 10, -30, 0 }, 3, { .2f, .4f, 6.f, 1 }));
+	scene.assignShader(sphere2_idx, phong);
+
+	int sphere3_idx = scene.addObject(
+		new Sphere(GL_TRIANGLES, 20, { 10, 10, 0 }, 4, { .6f, .4f, 3.f, 1 }));
+	scene.assignShader(sphere3_idx, phong);
+
+	int sphere4_idx = scene.addObject(
+		new Sphere(GL_TRIANGLES, 15, { -30, -20, 0 }, 4, { .8f, .2f, 1.f, 1 }));
+	scene.assignShader(sphere4_idx, phong);
+
+	int graph = scene.addObject(
+		new Digraph());
+	scene.assignShader(graph, constant);
+
 
 	auto t_now = t_start, t_last = t_start;
 	camera.setCamera();
@@ -236,8 +240,7 @@ int main() {
 		* Limit framerate
 		***********************************/
 		if (active){
-			water.update(time > .033 ? .033 : time, scene.objects(), plane_idx);
-			water2.update(time > .033 ? .033 : time, scene.objects(), plane_idx2);
+
 		}
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}
@@ -246,7 +249,7 @@ int main() {
 	glfwDestroyWindow(window);
 	double fps = frames / total_time;
 	std::cerr << "\nAverage FPS: " << fps << std::endl;
-	std::this_thread::sleep_for(std::chrono::seconds(5));
+	//std::this_thread::sleep_for(std::chrono::seconds(5));
 
 	glfwTerminate();
 	exit(EXIT_SUCCESS);

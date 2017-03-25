@@ -14,9 +14,12 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "")
 find_package(OpenGL)
 
 set(SOURCES
+	src/Agent.cpp
 	src/callbacks.cpp
 	src/Camera.cpp
 	src/Cloth.cpp
+	src/Digraph.cpp
+	src/DiNode.cpp
 	src/DynamicObject.cpp
 	src/glew.c
 	src/main.cpp
@@ -34,8 +37,11 @@ set(SOURCES
 	src/UtilGLEW.cpp
 	)
 set(HEADERS
+	include/Agent.h
 	include/Camera.h
 	include/Cloth.h
+	include/Digraph.h
+	include/DiNode.h
 	include/DynamicObject.h
 	include/Edge.h
 	include/Face.h

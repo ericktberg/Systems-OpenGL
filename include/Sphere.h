@@ -7,6 +7,7 @@ class Sphere : public RenderableObject
 public:
 	//----------------------------------------------------------------------------
 	// Constructors
+	Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv, glm::vec4 color);
 	Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv);
 	Sphere(GLenum mode, float radius, glm::vec3 center);
 	Sphere(GLenum mode, float radius);

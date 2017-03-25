@@ -133,7 +133,7 @@ rotate(float angle, const glm::vec3& axis) {
 
 void RenderableObject::render(Program* program, GLenum usage) const {
 	if (visible_normals_) {
-		renderNormals(program, usage);
+		//renderNormals(program, usage);
 	}
 
 	if (mode_ == GL_POINTS) {

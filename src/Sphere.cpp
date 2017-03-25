@@ -1,7 +1,7 @@
 #include "Sphere.h"
 #include <glm/gtx/norm.hpp>
 #include <algorithm>
-Sphere::Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv) :
+Sphere::Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv, glm::vec4 color) :
 		radius_(radius), 
 		center_(center),
 		subdiv_(subdiv),
@@ -10,7 +10,7 @@ Sphere::Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv) :
 	/**********************************
 	* Create Octohedron
 	***********************************/
-	glm::vec4 white = { .8f, .8f, .8f, 1 };
+	glm::vec4 white = color;
 	glm::vec3 a = glm::vec3(1.f, 0.f, 0.f);
 	glm::vec3 b = glm::vec3(-1.f, 0.f, 0.f);
 	glm::vec3 c = glm::vec3(0.f, 1.f, 0.f);
@@ -71,6 +71,8 @@ Sphere::Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv) :
 	radius_ = radius_ + .01;
 }
 
+Sphere::Sphere(GLenum mode, float radius, glm::vec3 center, int subdiv) 
+	: Sphere(mode, radius, center, subdiv, { .8f, .8f, .8f, 1 }) {}
 Sphere::Sphere(GLenum mode, float radius, glm::vec3 center) : Sphere(mode, radius, center, 2) {}
 Sphere::Sphere(GLenum mode, float radius) : Sphere(mode, radius, { 0, 0, 0 }) {}
 Sphere::Sphere(GLenum mode) : Sphere(mode, .25) {}

@@ -21,8 +21,8 @@ public:
 	int addObject(RenderableObject* object) { objects_.push_back(object); return objects_.size() - 1; }
 	int addShader(Program* program) { 
 		programs_.push_back(program);
-		program->setUniformVector3fv("lightPos1", 2, 0, 10);
-		program->setUniformVector3fv("lightPos2", -2, 5, 10);
+		program->setUniformVector3fv("lightPos1", 2, 0, 50);
+		program->setUniformVector3fv("lightPos2", -2, 5, 80);
 
 		return programs_.size() - 1; 
 	}
