@@ -18,6 +18,7 @@
 #include "Spline.h"
 #include "RenderableObject.h"
 
+#include "Agent.h"
 #include "Cloth.h"
 #include "PendulumSpring.h"
 #include "Projectile.h"
@@ -190,8 +191,17 @@ int main() {
 	int plane_idx = scene.addObject(new Plane(GL_TRIANGLES, 100, 100, { .6, .6, .6, 1 }, 1, 1));
 	scene.assignShader(plane_idx, phong);
 
-	int sphere1_idx = scene.addObject(
-		new Sphere(GL_TRIANGLES, 5, { 0, 30, 0 }, 2, { .2f, .8f, 0.f, 1 }));
+	int start = scene.addObject(new Plane(GL_TRIANGLES, 10, 10, { .1, .9, .1, .3 }, 1, 1));
+	scene.translate(start, { 45, 45, .3 });
+	scene.assignShader(start, constant);
+
+	int end = scene.addObject(new Plane(GL_TRIANGLES, 10, 10, { .9, .1, .1, .3 }, 1, 1));
+	scene.translate(end, { -45, -45, .3 });
+	scene.assignShader(end, constant);
+
+	Sphere sphere(GL_TRIANGLES, 1, { 0, 0, 1 }, 2, { .2f, .8f, 0.f, 1 });
+	int sphere1_idx = scene.addObject(&sphere);
+	scene.translate(sphere1_idx, { 45, 45, 0 });
 	scene.assignShader(sphere1_idx, phong);
 
 	int sphere2_idx = scene.addObject(
@@ -206,10 +216,12 @@ int main() {
 		new Sphere(GL_TRIANGLES, 15, { -30, -20, 0 }, 4, { .8f, .2f, 1.f, 1 }));
 	scene.assignShader(sphere4_idx, phong);
 
-	int graph = scene.addObject(
-		new Digraph());
+
+	Digraph digraph(scene);
+	int graph = scene.addObject(&digraph);
 	scene.assignShader(graph, constant);
 
+	Agent agent(&sphere, &digraph);
 
 	auto t_now = t_start, t_last = t_start;
 	camera.setCamera();
@@ -240,7 +252,7 @@ int main() {
 		* Limit framerate
 		***********************************/
 		if (active){
-
+			agent.updatePosition(time > .033 ? .033 : time);
 		}
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}

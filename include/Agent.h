@@ -7,19 +7,25 @@
 
 class Agent {
 public:
-	Agent();
+	Agent(Sphere* sphere, Digraph* digraph);
 	~Agent();
 
 	void updatePosition(float dt);
-	void calcRoute(const Scene& scene);
 
 private:
+	void changeDirection();
+	
 	Sphere* body_;
+
+
 
 	glm::vec3 position_;
 	glm::vec3 current_direction_;
 
-	Digraph prob_graph_;
+	Digraph* prob_graph_;
+	std::vector<int> path_;
+
+	int point;
 
 
 };

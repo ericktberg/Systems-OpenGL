@@ -55,6 +55,7 @@ public:
 	virtual float rayCollision(const glm::vec3& velocity, const glm::vec3& origin) { return -1; }
 	// deprecated
 	virtual float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const { return -1; }
+	virtual bool within(const glm::vec3& position) const { return false; }
 
 
 protected:

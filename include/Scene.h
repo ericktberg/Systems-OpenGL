@@ -31,6 +31,8 @@ public:
 	
 	void translate(int object_idx, glm::vec3 displacement) { objects_.at(object_idx)->translate(displacement); }
 
+	bool intersect(glm::vec3 point) const;
+
 private:
 	std::map<int/*object*/, int/*program*/> program_map_;
 

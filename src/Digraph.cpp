@@ -2,20 +2,23 @@
 #include <stdlib.h>
 
 Digraph::
-Digraph() : RenderableObject(GL_LINES) {
-	glm::vec3 p1 = { 45, 45, 5 };
-	glm::vec3 p2 = { -45, -45, 5 };
+Digraph(const Scene& scene) : RenderableObject(GL_LINES) {
+	glm::vec3 p1 = { 45, 45, 1 };
+	glm::vec3 p2 = { -45, -45, 1 };
 
 	addNode(p1);
 	for (int i = 0; i < 1000; i++) {
-		float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 90.f - 45.f;
+		float r1 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX)* 90.f - 45.f;
 		float r2 = static_cast <float> (rand()) / static_cast <float> (RAND_MAX)* 90.f - 45.f;
 		glm::vec3 p = { r1, r2, 1 };
-		addNode(p);
+		if (!scene.intersect(p)){
+			addNode(p);
+		}
 	}
 	addNode(p2);
 
 	linkNodes(7);
+	path_ = shortestPath(0, nodes_.size() - 1);
 }
 
 Digraph::
@@ -39,18 +42,12 @@ linkNodes(float distance) {
 			DiNode* n2 = nodes_.at(j);
 			float length = glm::length(n1->position() - n2->position());
 			if (length < distance) {
-				n1->link(n2);
-				n2->link(n1);
+				n1->link(j);
+				n2->link(i);
 				edges_.push_back({ i, j });
 			}
 		}
 	}
-
-	edges_.push_back({ 0, nodes_.size() -1  });
-	DiNode* n1 = nodes_.at(0);
-	DiNode* n2 = nodes_.at(nodes_.size() - 1);
-	n1->link(n2);
-	n2->link(n1);
 }
 
 glm::vec3 Digraph::
@@ -63,7 +60,50 @@ direction(int idx1, int idx2) {
 
 std::vector<int> Digraph::
 shortestPath(int start, int end) {
+	vertices_.at(start).color = { 0.f, 1.f, 1.f, 1 };
+	vertices_.at(end).color = { 0.f, 1.f, 1.f, 1 };
 
+	nodes_.at(0)->from_start = 0;
+	visit(0);
 
+	std::vector<int> path;
+	int previous = end;
+	while (previous != start) {
+		vertices_.at(previous).color = { 1.f, 0.f, 0.f, 1 };
+		path.push_back(previous);
+		DiNode* node = nodes_.at(previous);
+		previous = node->previous;
+	}
+	return path;
 }
 
+void Digraph::
+visit(int idx) {
+	DiNode* n1 = nodes_.at(idx);
+	n1->visited = true;
+
+	for (int j = 0; j < n1->size(); j++) {
+		int next = n1->at(j);
+
+		float distance = glm::length(direction(idx, next));
+		DiNode* n2 = nodes_.at(next);
+
+		if (!n2->visited){
+
+			if (n2->from_start == -1 || n2->from_start > n1->from_start + distance) {
+				n2->from_start = n1->from_start + distance;
+				n2->previous = idx;
+				vertices_.at(next).color = { 0.f, 0.f, 1.f, .3 };
+			}
+		}
+	}
+
+	for (int j = 0; j < n1->size(); j++) {
+		int next = n1->at(j);
+		DiNode* n2 = nodes_.at(next);
+
+		if (!n2->visited){
+			visit(next);
+		}
+	}
+}

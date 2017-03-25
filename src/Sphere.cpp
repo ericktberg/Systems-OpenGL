@@ -148,3 +148,8 @@ float Sphere::collisionPoint(const glm::vec3& vector, const glm::vec3& position)
 	return t;
 }
 
+bool Sphere::
+within(const glm::vec3& point) const {
+	return glm::length(point - center_) < radius_;
+}
+

@@ -19,6 +19,7 @@ public:
 	// Collision
 	bool intersectsGround(const glm::vec3& ground_plane);
 	float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const;
+	bool within(const glm::vec3& point) const;
 
 	glm::vec3 normal(glm::vec3 point) {
 		return glm::normalize(point - center_);

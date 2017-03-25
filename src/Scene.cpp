@@ -25,3 +25,13 @@ assignShader(int object_idx, int program_idx) {
 	objects_.at(object_idx)->vaoInit(programs_.at(program_idx));
 	program_map_[object_idx] = program_idx;
 }
+
+bool Scene::
+intersect(glm::vec3 point) const {
+	for (int i = 0; i < objects_.size(); i++) {
+		if (objects_.at(i)->within(point)) {
+			return true;
+		}
+	}
+	return false;
+}
