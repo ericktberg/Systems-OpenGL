@@ -12,7 +12,7 @@ Program::Program(int type) {
 	}
 	Shader fragment(f, GL_FRAGMENT_SHADER);
 
-	Shader vertex("shaders/Vertex/simple3d.glsl", GL_VERTEX_SHADER);
+	Shader vertex("shaders/Vertex/simple2d.glsl", GL_VERTEX_SHADER);
 
 	glAttachShader(program_id_, vertex.id());
 	glAttachShader(program_id_, fragment.id());

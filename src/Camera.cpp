@@ -5,23 +5,7 @@
 #include "Program.h"
 
 Camera::Camera(float window_width, float window_height) {
-	proj_ = glm::perspective(glm::radians(45.0f), window_width / window_height, 1.0f, 1000.0f);
-	rot_v_ = 45;
-	rot_u_ = 45;
-	dolly_ = 14.14 * 10;
+	proj_ = glm::ortho(-40.f, 40.f, -20.f, 20.f);
 }
 
 Camera::~Camera() {}
-
-void Camera::setCamera() {
-	glm::vec3 camera_pos = {
-		cos(rot_v_ * PI / 180) * sin(rot_u_ * PI / 180) * dolly_,
-		sin(rot_v_ * PI / 180) * sin(rot_u_ * PI / 180) * dolly_,
-		dolly_ * cos(rot_u_ * PI / 180)
-	};
-	view_ = glm::lookAt(
-		camera_pos,
-		glm::vec3(0.f, 0.f, 0.f),
-		glm::vec3(0.f, 0.f, 1.f)
-	);
-}

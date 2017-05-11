@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera.h"
+#include "Payload.h"
 #include "Program.h"
 #include "RenderableObject.h"
 
@@ -14,23 +15,22 @@ public:
 
 	void render(const Camera& camera) const;
 
+	int size() const { return objects_.size(); }
+
 	RenderableObject* objectAt(int idx) const { return objects_.at(idx); }
 	Program* programAt(int idx) const { return programs_.at(idx); }
 	std::vector<RenderableObject*> objects() const { return objects_; }
 	
-	int addObject(RenderableObject* object) { objects_.push_back(object); return objects_.size() - 1; }
-	int addShader(Program* program) { 
-		programs_.push_back(program);
-		program->setUniformVector3fv("lightPos1", 2, 0, 50);
-		program->setUniformVector3fv("lightPos2", -2, 5, 80);
-
-		return programs_.size() - 1; 
-	}
+	int addObject(RenderableObject* object);
+	int addShader(Program* program);
 
 	void assignShader(int object_idx, int program_idx);
 	
 	void translate(int object_idx, glm::vec3 displacement) { objects_.at(object_idx)->translate(displacement); }
 
+	Payload objectCollision(const RenderableObject*, 
+						const glm::vec3& velocity, 
+						const glm::vec3& origin) const;
 	bool intersect(glm::vec3 point) const;
 
 private:

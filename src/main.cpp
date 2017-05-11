@@ -12,39 +12,23 @@
 #include "Camera.h"
 #include "Scene.h"
 
-#include "Digraph.h"
-#include "Plane.h"
-#include "Sphere.h"
-#include "Spline.h"
-#include "RenderableObject.h"
-
-#include "Agent.h"
-#include "Cloth.h"
-#include "PendulumSpring.h"
-#include "Projectile.h"
-#include "ShallowWater.h"
+#include "Block.h"
+#include "Ball.h"
+#include "Circle.h"
+#include "Paddle.h"
+#include "Rectangle.h"
 
 #define PI 3.14159
-#define WINDOW_WIDTH 800
+#define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 800
 
-bool active = false;
-
-GLdouble mouse_x_g, mouse_y_g;
-bool mouse_drag_g = false;
-Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
-
 Scene scene;
+Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
+bool active = false;
+double lastx, lasty;
+bool moved = false;
 
-static void diffuse() {
-	Program* new_program = new Program(0);
-	scene.addShader(new_program);
-}
-
-static void object() {
-	Program* new_program = new Program(1);
-	scene.addShader(new_program);
-}
+Paddle* paddle = new Paddle(0, 0, 5);
 
 //----------------------------------------------------------------------------
 // function that is called whenever a key is pressed
@@ -52,28 +36,16 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	switch (key) {
 
 	case GLFW_KEY_UP:
-		if (action == GLFW_PRESS){
-			camera.dollyInc(-1);
-		}
-		else if (action == GLFW_REPEAT) {
-			camera.dollyInc(-.5);
-		}
-		camera.setCamera();
+
 		break;
 
 	case GLFW_KEY_DOWN:
-		if (action == GLFW_PRESS){
-			camera.dollyInc(1);
-		}
-		else if (action == GLFW_REPEAT) {
-			camera.dollyInc(.5);
-		}
-		camera.setCamera();
+	
 		break;
 
 	case GLFW_KEY_SPACE:
-		if (action == GLFW_PRESS){
-			active ^= true;
+		if (action == GLFW_PRESS) {
+			active = !active;
 		}
 		break;
 	case 033:  // octal ascii code for ESC
@@ -88,35 +60,21 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 //----------------------------------------------------------------------------
 // function that is called whenever a cursor motion event occurs
 static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos) {
-	double dx, dy;
-	dx = xpos - mouse_x_g;
-	dy = ypos - mouse_y_g;
-	mouse_x_g = xpos;
-	mouse_y_g = ypos;
-	if (mouse_drag_g) {
-		camera.rotV(dx);
-		camera.rotU(-dy);
-		camera.setCamera();
-	}
+
+
+		lastx = xpos;
+		lasty = ypos;
+		moved = true;
 }
 //----------------------------------------------------------------------------
 // function that is called whenever a mouse or trackpad button press event occurs
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-	glfwGetCursorPos(window, &mouse_x_g, &mouse_y_g);
-
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action ==
-		GLFW_PRESS) {
-		mouse_drag_g = true;
-	}
-	else if (button == GLFW_MOUSE_BUTTON_LEFT && action ==
-		GLFW_RELEASE) {
-		mouse_drag_g = false;
-	}
+	
 }
 
 //----------------------------------------------------------------------------
 // GLFW window stuff
-void createWindow(GLFWwindow** window, int height, int width) {
+void createWindow(GLFWwindow** window, int width, int height) {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
@@ -124,41 +82,19 @@ void createWindow(GLFWwindow** window, int height, int width) {
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	*window = glfwCreateWindow(height, width, "test", nullptr, nullptr);  // Windowed
+	*window = glfwCreateWindow(width, height, "test", nullptr, nullptr);  // Windowed
 	glfwMakeContextCurrent(*window);
 }
 
-void clothSim() {
-	int phong = scene.addShader(new Program(PHONG_NOSPEC));
-	int constant = scene.addShader(new Program(CONSTANT_COL));
-
-	int sphere = scene.addObject(new Sphere(GL_TRIANGLES, .5, { 0, 0, 2 }, 3));
-	scene.assignShader(sphere, phong);
-
-	Plane* plane = new Plane(GL_TRIANGLES, 2, 2, { .4, .1, .4, 1 }, 20, 20);
-	plane->calcNormals();
-	int plane_idx = scene.addObject(plane);
-	scene.translate(plane_idx, { -1, 0, 3 });
-	scene.assignShader(plane_idx, phong);
-
-	int ground = scene.addObject(new Plane(GL_LINES, 20, 20, { .6, .2, .2, 1 }, 20, 20));
-	scene.assignShader(ground, constant);
-
-	Cloth cloth(plane);
-
-	int ball = scene.addObject(new Sphere(GL_POINTS, .25, { 0, 3, 2 }, 3));
-	scene.assignShader(ball, constant);
-}
-
-
 int main() {
+
 	auto t_start = std::chrono::high_resolution_clock::now();
 	/**********************************
 	* Initialize library elements
 	***********************************/
 	GLFWwindow *window;
 
-	createWindow(&window, WINDOW_HEIGHT, WINDOW_WIDTH);
+	createWindow(&window, WINDOW_WIDTH, WINDOW_HEIGHT);
 	if (!window) {
 		glfwTerminate();
 		exit(EXIT_FAILURE);
@@ -174,7 +110,7 @@ int main() {
 	***********************************/
 	glEnable(GL_BLEND); glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glClearColor(.95, .93, .93, 1);
+	glClearColor(0, 0, 0, 1);
 	/**********************************
 	* Define GLFW input callbacks
 	***********************************/
@@ -184,47 +120,49 @@ int main() {
 	/**********************************
 	* Define buffer objects
 	***********************************/
-	int phong = scene.addShader(new Program(PHONG_NOSPEC));
 	int constant = scene.addShader(new Program(CONSTANT_COL));
+	int paddleID = scene.addObject(paddle);
 
-	/* floor */
-	int plane_idx = scene.addObject(new Plane(GL_TRIANGLES, 100, 100, { .6, .6, .6, 1 }, 1, 1));
-	scene.assignShader(plane_idx, phong);
+	scene.assignShader(paddleID, constant);
 
-	int start = scene.addObject(new Plane(GL_TRIANGLES, 10, 10, { .1, .9, .1, .3 }, 1, 1));
-	scene.translate(start, { 45, 45, .3 });
-	scene.assignShader(start, constant);
+	/* Define game boundaries */
+	int left = scene.addObject(new Rectangle(-40, 0, 41, 1));
+	scene.assignShader(left, constant);
+	int right = scene.addObject(new Rectangle(40, 0, 41, 1));
+	scene.assignShader(right, constant);
+	int top = scene.addObject(new Rectangle(0, -20, 1, 81));
+	scene.assignShader(top, constant);
+	int bottom = scene.addObject(new Rectangle(0, 20, 1, 81));
+	scene.assignShader(bottom, constant);
+	
+	/* Create Bricks */
+	for (int i = 0; i < 26; i++) {
+		float x = -38 + i * 3;
+		int block;
 
-	int end = scene.addObject(new Plane(GL_TRIANGLES, 10, 10, { .9, .1, .1, .3 }, 1, 1));
-	scene.translate(end, { -45, -45, .3 });
-	scene.assignShader(end, constant);
+		block = scene.addObject(new Block(x, 0, .9, 2.9));
 
-	Sphere sphere(GL_TRIANGLES, 1, { 0, 0, 1 }, 2, { .2f, .8f, 0.f, 1 });
-	int sphere1_idx = scene.addObject(&sphere);
-	scene.translate(sphere1_idx, { 45, 45, 0 });
-	scene.assignShader(sphere1_idx, phong);
+		scene.assignShader(block, constant);
 
-	int sphere2_idx = scene.addObject(
-		new Sphere(GL_TRIANGLES, 10, { 10, -30, 0 }, 3, { .2f, .4f, 6.f, 1 }));
-	scene.assignShader(sphere2_idx, phong);
+	}
+	/*
+	for (int i = 0; i < 25; i++) {
+		float x = -36 + i * 3;
+		int block;
 
-	int sphere3_idx = scene.addObject(
-		new Sphere(GL_TRIANGLES, 20, { 10, 10, 0 }, 4, { .6f, .4f, 3.f, 1 }));
-	scene.assignShader(sphere3_idx, phong);
+		block = scene.addObject(new Block(x, 1, .9, 2.9));
+		scene.assignShader(block, constant);
+	}
+	*/
 
-	int sphere4_idx = scene.addObject(
-		new Sphere(GL_TRIANGLES, 15, { -30, -20, 0 }, 4, { .8f, .2f, 1.f, 1 }));
-	scene.assignShader(sphere4_idx, phong);
+	paddle->scene = &scene;
 
-
-	Digraph digraph(scene);
-	int graph = scene.addObject(&digraph);
-	scene.assignShader(graph, constant);
-
-	Agent agent(&sphere, &digraph);
+	/* Create ball and paddle*/
+	Ball* ball = new Ball(0, 10, .3);
+	int ball_idx  = scene.addObject(ball);
+	scene.assignShader(ball_idx, constant);
 
 	auto t_now = t_start, t_last = t_start;
-	camera.setCamera();
 	int frames = 0;
 	double total_time = 0;
 	while (!glfwWindowShouldClose(window)) {
@@ -235,7 +173,7 @@ int main() {
 		t_last = t_now;
 		t_now = std::chrono::high_resolution_clock::now();
 		double time = std::chrono::duration_cast<std::chrono::duration<double>>(t_now - t_last).count();
-		std::cerr << "elapsed: " << time << std::endl;
+		//std::cerr << "elapsed: " << time << std::endl;
 		total_time += time;
 		frames++;
 		/**********************************
@@ -246,14 +184,18 @@ int main() {
 		/**********************************
 		* Draw our objects
 		***********************************/
+		ball->start(active);
+
 		scene.render(camera);
+
 		glfwSwapBuffers(window);
+		paddle->translate(lastx * 80 / WINDOW_WIDTH - 40, -lasty * 40 / WINDOW_HEIGHT + 20, 0);
+		moved = false;
+		ball->update(time > .03 ? .03 : time, &scene);
 		/**********************************
 		* Limit framerate
 		***********************************/
-		if (active){
-			agent.updatePosition(time > .033 ? .033 : time);
-		}
+	
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}
 
@@ -261,7 +203,6 @@ int main() {
 	glfwDestroyWindow(window);
 	double fps = frames / total_time;
 	std::cerr << "\nAverage FPS: " << fps << std::endl;
-	//std::this_thread::sleep_for(std::chrono::seconds(5));
 
 	glfwTerminate();
 	exit(EXIT_SUCCESS);

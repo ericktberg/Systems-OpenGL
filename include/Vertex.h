@@ -5,11 +5,10 @@
 struct Vertex {
 	glm::vec3 position;
 	glm::vec4 color;
-	glm::vec3 normal;
 };
 
 inline Vertex operator+(Vertex p1, Vertex p2) {
-	return { (p1.position + p2.position) / 2.f, (p1.color + p2.color) / 2.f, (p1.normal + p2.normal) / 2.f };
+	return { (p1.position + p2.position) / 2.f, (p1.color + p2.color) / 2.f };
 }
 
 inline Vertex operator/(Vertex p, float div) {
