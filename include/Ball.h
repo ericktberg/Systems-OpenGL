@@ -5,6 +5,7 @@
 #include "Circle.h"
 #include "Scene.h"
 
+//#define DEBUG_BALL
 
 class Ball : public Circle {
 public:

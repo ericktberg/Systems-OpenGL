@@ -17,7 +17,7 @@ Circle(float x, float y, float radius) : radius_(radius), RenderableObject(GL_TR
 }
 
 Payload Circle::
-rayCollision(const glm::vec3& velocity, const glm::vec3& origin) const {
+rayCollision(const glm::vec3& velocity, const glm::vec3& origin) {
 	//TODO
 	return{ -1, -1, { 0, 0, 0 } };
 }

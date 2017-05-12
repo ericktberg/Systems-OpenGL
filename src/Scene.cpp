@@ -53,7 +53,7 @@ Payload Scene::
 objectCollision(const RenderableObject* source,
 	const glm::vec3& velocity,
 	const glm::vec3& origin)
-const {
+ {
 	Payload closest = { -1, -1, { 0, 0, 0 } };
 	for (int i = 0; i < objects_.size(); i++) {
 		if (i != source->index()) {

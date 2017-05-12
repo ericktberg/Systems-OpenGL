@@ -16,7 +16,7 @@ public:
 
 	void interact() { state_ = POPPED; }
 
-	Payload rayCollision(const glm::vec3& velocity, const glm::vec3& origin) const;
+	Payload rayCollision(const glm::vec3& velocity, const glm::vec3& origin);
 	void renderEdges(Program* program, GLenum usage) const;
 private:
 

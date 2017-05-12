@@ -104,9 +104,9 @@ translate(float x, float y, float z) {
 	position_ = { x, y, z };
 	translation_ = { 
 		{1, 0, 0, 0},
-		{0, 1, 0, 0},
+		{0, -1, 0, 0},
 		{0, 0, 1, 0},
-		{x, -y, z, 1} };
+		{x, y, z, 1} };
 }
 
 void RenderableObject::
@@ -159,7 +159,7 @@ lineIntersection(
 
 	*u = (-v.y * (o.x - p1.x) + v.x * (o.y - p1.y)) / cross(v, s);
 	*t = (-s.y * (o.x - p1.x) + s.x * (o.y - p1.y)) / cross(v, s);
-	if (*t < 1 && index() == 0) {
+	if (*t < 1 && *t > 0) {
 		auto breakpoint = 1;
 	}
 	if (normal) {

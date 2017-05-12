@@ -27,6 +27,8 @@ Camera camera(WINDOW_WIDTH, WINDOW_HEIGHT);
 bool active = false;
 double lastx, lasty;
 bool moved = false;
+float distance = 0;
+
 
 Paddle* paddle = new Paddle(0, 0, 5);
 
@@ -36,11 +38,19 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	switch (key) {
 
 	case GLFW_KEY_UP:
-
+		if (action == GLFW_REPEAT) {
+			if (distance < 5) {
+				distance += .1;
+				paddle->pullBack(distance);
+			}
+		}
+		else if (action == GLFW_RELEASE) {
+			distance = 0;
+			paddle->release();
+		}
 		break;
 
 	case GLFW_KEY_DOWN:
-	
 		break;
 
 	case GLFW_KEY_SPACE:
@@ -130,12 +140,16 @@ int main() {
 	scene.assignShader(left, constant);
 	int right = scene.addObject(new Rectangle(40, 0, 41, 1));
 	scene.assignShader(right, constant);
-	int top = scene.addObject(new Rectangle(0, -20, 1, 81));
-	scene.assignShader(top, constant);
-	int bottom = scene.addObject(new Rectangle(0, 20, 1, 81));
+	Rectangle* test = new Rectangle(0, -20, 1, 81);
+	test->scene = &scene;
+	int bottom = scene.addObject(test);
 	scene.assignShader(bottom, constant);
-	
+	int top = scene.addObject(new Rectangle(0, 20, 1, 81));
+	scene.assignShader(top, constant);
+
+
 	/* Create Bricks */
+
 	for (int i = 0; i < 26; i++) {
 		float x = -38 + i * 3;
 		int block;
@@ -145,7 +159,6 @@ int main() {
 		scene.assignShader(block, constant);
 
 	}
-	/*
 	for (int i = 0; i < 25; i++) {
 		float x = -36 + i * 3;
 		int block;
@@ -153,13 +166,13 @@ int main() {
 		block = scene.addObject(new Block(x, 1, .9, 2.9));
 		scene.assignShader(block, constant);
 	}
-	*/
+
 
 	paddle->scene = &scene;
 
 	/* Create ball and paddle*/
-	Ball* ball = new Ball(0, 10, .3);
-	int ball_idx  = scene.addObject(ball);
+	Ball* ball = new Ball(0, -15, .3);
+	int ball_idx = scene.addObject(ball);
 	scene.assignShader(ball_idx, constant);
 
 	auto t_now = t_start, t_last = t_start;
@@ -189,13 +202,19 @@ int main() {
 		scene.render(camera);
 
 		glfwSwapBuffers(window);
-		paddle->translate(lastx * 80 / WINDOW_WIDTH - 40, -lasty * 40 / WINDOW_HEIGHT + 20, 0);
-		moved = false;
-		ball->update(time > .03 ? .03 : time, &scene);
+		if (active) {
+			paddle->translate(lastx * 80 / WINDOW_WIDTH - 40, -lasty * 40 / WINDOW_HEIGHT + 20, 0);
+			
+			moved = false;
+			paddle->update(time > .03 ? .03 : time);
+			ball->update(time > .03 ? .03 : time, &scene);
+			
+			paddle->grace--;
+		}
 		/**********************************
 		* Limit framerate
 		***********************************/
-	
+
 		auto t_end = std::chrono::high_resolution_clock::now();
 	}
 

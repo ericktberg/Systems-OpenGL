@@ -30,7 +30,7 @@ public:
 
 	Payload objectCollision(const RenderableObject*, 
 						const glm::vec3& velocity, 
-						const glm::vec3& origin) const;
+						const glm::vec3& origin);
 	bool intersect(glm::vec3 point) const;
 
 private:

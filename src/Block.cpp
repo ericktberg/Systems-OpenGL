@@ -35,7 +35,7 @@ renderEdges(Program* program, GLenum usage) const {
 }
 
 Payload Block::
-rayCollision(const glm::vec3& velocity, const glm::vec3& origin) const {
+rayCollision(const glm::vec3& velocity, const glm::vec3& origin) {
 	
 	Payload payload = { -1, -1, { 0, 0, 0 } };
 	if (state_ == SOLID) {

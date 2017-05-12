@@ -52,7 +52,7 @@ public:
 	//----------------------------------------------------------------------------
 	// Collisions
 	virtual bool intersectsGround(const glm::vec3& groundPlane) { return false; }
-	virtual Payload rayCollision(const glm::vec3& velocity, const glm::vec3& origin) const {
+	virtual Payload rayCollision(const glm::vec3& velocity, const glm::vec3& origin) {
 		return{ -1, -1, { 0, 0, 0}}; }
 	// deprecated
 	virtual float collisionPoint(const glm::vec3& vector, const glm::vec3& position) const { return -1; }
@@ -60,6 +60,7 @@ public:
 
 	void setIndex(int idx) { scene_idx_ = idx; };
 	int index() const { return scene_idx_; }
+
 protected:
 	//----------------------------------------------------------------------------
 	// Geometry
@@ -98,6 +99,10 @@ protected:
 		glm::vec3 *normal = nullptr) const;
 
 	int scene_idx_;
+	//----------------------------------------------------------------------------
+	// Properties
+	float cor_ = 1;
+
 };
 
 inline float cross(const glm::vec3& v, const glm::vec3& w) {
